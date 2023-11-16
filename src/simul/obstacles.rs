@@ -1,3 +1,6 @@
+pub use pole::Pole;
+pub mod pole;
+
 use bevy::prelude::*;
 
 #[derive(Default)]
@@ -6,14 +9,7 @@ pub struct ObstaclesPlugin {
 }
 
 impl Plugin for ObstaclesPlugin {
-    fn build(&self, app: &mut App) {
-        todo!()
+    fn build(&self, _app: &mut App) {
+        /* This method is here for future use. */
     }
-}
-
-pub mod bundles {
-    use bevy::prelude::*;
-
-    #[derive(Bundle)]
-    pub struct Sector {}
 }

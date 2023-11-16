@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
 #[derive(Default)]
-pub struct CameraPlugin {
+pub struct ObservationPlugin {
     _future_priv_fields: (),
 }
 
-impl Plugin for CameraPlugin {
+impl Plugin for ObservationPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, |mut cmds: Commands| {
             cmds.spawn(CameraBundle::new(default()));
