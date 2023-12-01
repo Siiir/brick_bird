@@ -26,6 +26,7 @@ use crate::SimulPlanePlugin;
 ///
 /// These plugins can be configured, set from these interface,
 ///  before running the simulation.
+#[allow(missing_docs)]
 #[derive(Default)]
 pub struct SimulPlugins {
     pub observation: ObservationPlugin,

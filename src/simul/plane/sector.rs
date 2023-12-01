@@ -1,30 +1,63 @@
+//! Module encapsulating logic around `Sector` struct.
+
 use bevy::prelude::*;
 
 pub use entity_data::EntityData;
 pub mod entity_data;
 
+/// A division of the simulation plane.
+///
+/// Can & is meant to be bound to a concrete entity that represents it. Contains cool properties which are used for the sector based calculations like: location detection, collision detection.
 #[derive(Default, Debug)]
 pub struct Sector {
+    /// The concrete entity to which this logical object is bound to.
     entity: Option<EntityData>,
+    /// Obstacle restricting passage through the upper part of this sector.
     upper_pole: crate::simul::obstacles::Pole,
+    /// Obstacle restricting passage through the lower part of this sector.
     lower_pole: crate::simul::obstacles::Pole,
 }
 impl Sector {
     // Given
+
+    /// The scale of all spawned sectors.
     pub const SCALE: Vec3 = Vec3::new(300.0, 900.0, 0.1);
+    /// The minimal gap between the 2 poles that restrict passage through this sector.
+    ///
+    /// It is encoded as a fraction of this sector's height.
+    /// The positive (and high enough) value of this constant ensures that the hero can always pass through the gap and remain untouched by the obstacles.
     pub const MIN_GAP: f32 = 0.2;
-    pub const TRANSLATION_Y: f32 = 0.;
+    /// The y coordinate for all spawned sectors.
+    const TRANSLATION_Y: f32 = 0.;
     pub const DISPLAY_LAYER: f32 = 0.;
+
     // Calculated
+
+    /// The maximum fraction of height that can be occupied by obstacles.
+    ///
+    /// Because this value is < 1 (enough less then), hero can pass through every sector untouched.
+    /// This constant faciliates the compution of quantity of space/passage that is free to be occupied by some obstacles.
     pub const MAX_OCCUPIED_HEIGHT: f32 = 1.0 - Self::MIN_GAP;
+
     // Calculations
+
+    /// States how much vertical space/passage is still free to be occupied by some obstacles.
     pub fn left_vertical_space(taken_space: f32) -> f32 {
         Self::MAX_OCCUPIED_HEIGHT - taken_space
     }
-    // Relation with entity
+
+    // Properties
+
+    /// Returns true <==> this logical sector is bound to concrete entity.
     pub fn entity_present(&self) -> bool {
         self.entity.is_some()
     }
+
+    // (De)Binding with entity
+
+    /// Spawns the corresponding concrete entity for this logical sector object.
+    ///
+    /// Binds `self` to spawned entity.
     pub fn spawn(&mut self, translation_x: f32, color_rbg: [f32; 3], cmds: &mut Commands) {
         if self.entity_present() {
             panic!("Attempt to spawn simulation plane sector that has already been spawned.")
@@ -34,19 +67,17 @@ impl Sector {
             translation_x,
         ));
     }
-    // The binding with entity
-    #[deprecated(note = "Unmantained. Use `.spawn` instead.")]
-    #[allow(warnings)]
-    fn spawn_if_absent(&mut self, cmds: &mut Commands) {
-        self.entity.get_or_insert_with(|| todo!("Spawn"));
-    }
+
+    /// Despawns the concrete entity `self` is bounded to. Unbinds `self`.
     pub fn despawn(&mut self, cmds: &mut Commands) {
         let entity = self.entity.take().unwrap_or_else(|| {
             panic!("Attempt to despawn a simulation plane sector entity that has't been spawned.")
         });
         cmds.entity(entity.id()).despawn_recursive();
     }
-    // Helpers
+
+    // Aid functions.
+
     fn spawn_sector_entity(
         &self,
         cmds: &mut Commands<'_, '_>,
@@ -88,6 +119,7 @@ impl Sector {
     }
 }
 
+// Standard distribution of sectors.
 impl rand::distributions::Distribution<Sector> for rand::distributions::Standard {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Sector {
         use crate::simul::obstacles::Pole;
