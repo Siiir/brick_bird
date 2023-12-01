@@ -1,3 +1,7 @@
+//! The fly-bevy game's binary.
+
+#![warn(missing_docs)]
+
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 pub use simul::{
     plane::{res::plane::SimulPlane, SimulPlanePlugin},
@@ -11,7 +15,10 @@ use bevy::{
     prelude::*,
 };
 
+/// Launches the app logic with simple in-place config.
 fn main() {
+    // Just add + configure plugins and then run.
+    // Plugins should encapsulate all the games logic.
     App::new()
         .add_plugins((
             DefaultPlugins.set(LogPlugin {

@@ -1,1 +1,3 @@
+//! Resources.
+
 pub mod plane;

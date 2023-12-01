@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 use derive_more::IntoIterator;
-use rand::Rng;
-use tap::Tap;
 
 #[derive(Resource, Debug, IntoIterator)]
 pub struct SimulPlane {
@@ -63,8 +61,10 @@ impl SimulPlane {
     ) {
         next_sect.spawn(*next_sect_x, (*next_sect_color_rbg).into(), cmds);
         *next_sect_x += crate::simul::Sector::SCALE.x;
-        *next_sect_color_rbg =
-            next_rand_color_rbg(*next_sect_color_rbg, SimulPlane::MIN_SECT_COLOR_CONTRAST);
+        *next_sect_color_rbg = game::color::contrasting_rand_rbg(
+            *next_sect_color_rbg,
+            SimulPlane::MIN_SECT_COLOR_CONTRAST,
+        );
     }
 }
 
@@ -73,28 +73,11 @@ impl SimulPlane {
 impl Default for SimulPlane {
     fn default() -> Self {
         Self {
-            x_axis: [crate::simul::Sector::default()]
-                .into_iter()
-                .cycle()
+            x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
                 .take(Self::DEFAULT_SECT_COUNT)
                 .collect(),
             next_sect_x: Self::FIRST_SECT_X,
-            next_sect_color_rbg: rand_color_rbg(),
-        }
-    }
-}
-
-fn rand_color_rbg() -> [f32; 3] {
-    [f32::NAN; 3].tap_mut(|arr| rand::thread_rng().fill(arr))
-}
-fn rbg_color_contrast(lhs: [f32; 3], rhs: [f32; 3]) -> f32 {
-    lhs.into_iter().zip(rhs).map(|(x, y)| (x - y).abs()).sum()
-}
-fn next_rand_color_rbg(prev_color: [f32; 3], min_contrast: f32) -> [f32; 3] {
-    loop {
-        let next_color = rand_color_rbg();
-        if rbg_color_contrast(prev_color, next_color) >= min_contrast {
-            return next_color;
+            next_sect_color_rbg: game::color::rand_rbg(),
         }
     }
 }
@@ -108,7 +91,7 @@ impl rand::distributions::Distribution<SimulPlane> for rand::distributions::Stan
                 .take(SimulPlane::DEFAULT_SECT_COUNT)
                 .collect(),
             next_sect_x: SimulPlane::FIRST_SECT_X,
-            next_sect_color_rbg: rand_color_rbg(),
+            next_sect_color_rbg: game::color::rand_rbg(),
         }
     }
 }

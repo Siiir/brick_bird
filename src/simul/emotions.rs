@@ -1,5 +1,9 @@
+//! Encapsulates the logic of humoristic "emotions" that are in fact effects.
+//!  "Emotions" can be put on in-game entities.
+
 use bevy::prelude::*;
 
+/// Enables affecting entities with emotion components.
 #[derive(Default)]
 pub struct EmotionsPlugin {
     _future_priv_fields: (),
@@ -11,9 +15,15 @@ impl Plugin for EmotionsPlugin {
     }
 }
 
+/// Components.
 pub mod compos {
     use bevy::prelude::*;
 
+    /// The basic emotion that adventure-thirsty Flapik is bound to experience.
+    ///
+    /// It makes his a head go down. And the body starts heading towords the ground.
+    /// This makes for the fall that generally causes death to the depressed birds.
+    /// Hopefully player does something to mitigate this effect.
     #[derive(Component, Debug, Default, Reflect)]
     #[reflect(Component)]
     pub struct Boredom {
@@ -34,8 +44,10 @@ pub mod compos {
     }
 }
 
+/// Systems making emotions have actual impact on their victims.
 pub mod sys {
     use bevy::prelude::*;
+    /// System that makes sure that all bordom-possessing entities experience its cruelty.
     pub fn boredom(
         time: Res<Time>,
         mut victims: Query<(&mut Transform, &crate::simul::emotions::compos::Boredom)>,

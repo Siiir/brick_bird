@@ -1,25 +1,31 @@
-pub use observator::{CameraBundle, ObservationPlugin};
+//! Module containing plugins related to the in-game simulation.
+
 pub mod observator;
+pub use observator::{CameraBundle, ObservationPlugin};
 
-pub use hero::{bundles::HeroBundle, compos::HeroCore, HeroPlugin};
 pub mod hero;
+pub use hero::{bundles::HeroBundle, compos::HeroCore, HeroPlugin};
 
-pub use obstacles::ObstaclesPlugin;
 pub mod obstacles;
+pub use obstacles::ObstaclesPlugin;
 
-pub use plane::{res::hero_sect::HeroSect, sector::Sector};
 pub mod plane;
+pub use plane::sector::Sector;
 
-pub use motion::{compos::Motion, MotionPlugin};
 pub mod motion;
+pub use motion::{compos::Motion, MotionPlugin};
 
-pub use emotions::EmotionsPlugin;
 pub mod emotions;
+pub use emotions::EmotionsPlugin;
 
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
 use crate::SimulPlanePlugin;
 
+/// Is meant to contain all the simulation plugins.
+///
+/// These plugins can be configured, set from these interface,
+///  before running the simulation.
 #[derive(Default)]
 pub struct SimulPlugins {
     pub observation: ObservationPlugin,

@@ -1,10 +1,14 @@
+//! Module encapsulating the logic behind observation of the in-game simulation through "camera".
+
 use bevy::prelude::*;
 
+/// Plugin that gives a player ability to observe the in-game simulation. Mainly through "camera".
 #[derive(Default)]
 pub struct ObservationPlugin {
     _future_priv_fields: (),
 }
 
+// Impl.
 impl Plugin for ObservationPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, |mut cmds: Commands| {
@@ -14,35 +18,16 @@ impl Plugin for ObservationPlugin {
     }
 }
 
-pub mod sys {
-    use crate::simul::HeroCore;
-    use bevy::prelude::*;
-
-    /// Loose following system.
-    pub fn follow_hero(
-        mut cam: Query<(&mut Transform,), (With<Camera>, Without<HeroCore>)>,
-        hero: Query<(&Transform,), (With<HeroCore>, Without<Camera>)>,
-    ) {
-        // Unwrapping
-        let (Ok((mut cam,)), Ok((hero,))) = (cam.get_single_mut(), hero.get_single()) else {
-            // Since it's loose implementation it idles when work conditions are inconvenient.
-            return;
-        };
-        // Spatial operations.
-        {
-            let cam = &mut cam.translation;
-            let hero = &hero.translation;
-            cam.x = hero.x;
-            cam.y = hero.y;
-        }
-    }
-}
+/// Systems that control the effect of observation.
+pub mod sys;
 
 pub use bundles::CameraBundle;
+#[allow(missing_docs)]
 pub mod bundles {
     use bevy::prelude::*;
     use derive_more::Constructor;
 
+    /// All components of the in-game camera entity.
     #[derive(Bundle, Constructor)]
     pub struct CameraBundle {
         base: Camera2dBundle,

@@ -1,9 +1,12 @@
+//! Encapsulates the logic behind the plane that is traversed by the in-game hero.
+
 pub mod res;
 pub mod sector;
 pub mod sys;
 
 use bevy::prelude::*;
 
+/// Provides the simulation plane with all strictly embeded objects.
 #[derive(Default)]
 pub struct SimulPlanePlugin {
     _future_priv_fields: (),

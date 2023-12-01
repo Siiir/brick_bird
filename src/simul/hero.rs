@@ -1,8 +1,14 @@
+//! Module encapsulating the logic related to the in-game hero, who is controled by a player.
+
 use bevy::prelude::*;
 
+/// Initial hero velocity.
+///
+/// The velocity value with witch the hero entity will start
 pub const INIT_VELOCITY: f32 = 100.;
 pub const HEAD_UP_ANGLE: f32 = 0.3;
 
+/// Provides hero with his behaviour and effect on the environment.
 #[derive(Default)]
 pub struct HeroPlugin {
     _future_priv_fields: (),
@@ -18,8 +24,12 @@ impl Plugin for HeroPlugin {
     }
 }
 
+/// Hero's components.
 pub mod compos {
     use bevy::prelude::*;
+    /// Provides the hero's unique core.
+    ///
+    /// This marker allow to easily discern hero from other entities.
     #[derive(Component, Reflect, Default)]
     #[reflect(Component)]
     pub struct HeroCore {
@@ -27,6 +37,7 @@ pub mod compos {
     }
 }
 
+/// Bundles.
 pub mod bundles {
     use bevy::prelude::*;
     use derive_more::Constructor;
@@ -42,6 +53,9 @@ pub mod bundles {
     impl HeroBundle {
         pub const DISPLAY_LAYER: f32 = 10.0;
     }
+    /// Creates a hero bundle that will set the hero on the starting point of the game.
+    ///
+    /// Hero created this way will have default stats and start-friendly behaviour.
     impl Default for HeroBundle {
         fn default() -> Self {
             Self::new(
@@ -71,9 +85,13 @@ pub mod bundles {
     }
 }
 
+/// Systems controling hero and their effect on the surrounding environment.
 pub mod sys {
     use bevy::prelude::*;
 
+    /// Forces hero to involuntary fly forward untill they die.
+    ///
+    /// This can be seen as sad BUT makes a good selling point.
     pub fn fly_flappik_fly(
         time: Res<Time>,
         mut hero: Query<(&mut Transform, &crate::simul::Motion), (With<crate::simul::HeroCore>,)>,
@@ -87,6 +105,7 @@ pub mod sys {
         transform.translation += street * forward;
     }
 
+    /// Makes hero experience a positive stimulation, whenever the players clicks space key.
     pub fn head_up_flappik(
         kbd_input: Res<Input<KeyCode>>,
         mut hero: Query<&mut Transform, With<crate::simul::HeroCore>>,
