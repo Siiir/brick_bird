@@ -68,7 +68,7 @@ pub mod bundles {
                     },
                     transform: Transform {
                         translation: [
-                            crate::SimulPlane::FIRST_SECT_X + crate::simul::Sector::SCALE.x,
+                            crate::SimulPlane::DEFAULT_FIRST_SECT_X + crate::simul::Sector::SCALE.x,
                             0.,
                             Self::DISPLAY_LAYER,
                         ]

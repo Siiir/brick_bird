@@ -1,7 +1,7 @@
 //! Module containing plugins related to the in-game simulation.
 
 pub mod observator;
-pub use observator::{CameraBundle, ObservationPlugin};
+pub use observator::{bundles::CameraBundle, ObservationPlugin};
 
 pub mod hero;
 pub use hero::{bundles::HeroBundle, compos::HeroCore, HeroPlugin};

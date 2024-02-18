@@ -1,8 +1,15 @@
 //! Module encapsulating logic around `Sector` struct.
 
+use std::{
+    backtrace::{Backtrace, BacktraceStatus},
+    sync::atomic::AtomicBool,
+};
+
 use bevy::prelude::*;
 
 pub use entity_data::EntityData;
+
+use crate::color;
 pub mod entity_data;
 
 /// A division of the simulation plane.
@@ -102,24 +109,20 @@ impl Sector {
         .with_children(|child_builder: &mut ChildBuilder| {
             self.upper_pole.spawn_as_upper(
                 child_builder,
-                game::color::contrasting_rand_rbg(
-                    color_rbg,
-                    crate::SimulPlane::MIN_SECT_COLOR_CONTRAST,
-                ),
+                color::contrasting_rand_rbg(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
             );
             self.lower_pole.spawn_as_lower(
                 child_builder,
-                game::color::contrasting_rand_rbg(
-                    color_rbg,
-                    crate::SimulPlane::MIN_SECT_COLOR_CONTRAST,
-                ),
+                color::contrasting_rand_rbg(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
             )
         })
         .id()
     }
 }
 
-// Standard distribution of sectors.
+// CRUD-C: Constructors
+
+/// Standard distribution of sectors.
 impl rand::distributions::Distribution<Sector> for rand::distributions::Standard {
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Sector {
         use crate::simul::obstacles::Pole;
@@ -136,6 +139,34 @@ impl rand::distributions::Distribution<Sector> for rand::distributions::Standard
             entity: None,
             upper_pole,
             lower_pole,
+        }
+    }
+}
+
+// CRUD-D: Destructors
+
+impl Drop for Sector {
+    fn drop(&mut self) {
+        if self.entity_present() {
+            static ERR_HAS_BEEN_DISPLAYED: AtomicBool = AtomicBool::new(false);
+
+            // If the error hasn't been started being displayed before entering this `if`.
+            if !ERR_HAS_BEEN_DISPLAYED.swap(true, std::sync::atomic::Ordering::SeqCst) {
+                // Prepare for displaying the error.
+                let backtrace = Backtrace::capture();
+                let backtrace_info = match backtrace.status() {
+                    BacktraceStatus::Captured => format!("\n{backtrace}"),
+                    BacktraceStatus::Disabled => format!(" Note: Run with `RUST_BACKTRACE=1` environment variable to display a backtrace."),
+                    BacktraceStatus::Unsupported | _ => format!(" Note: Backtrace is unsupported on your platform."),
+                };
+                // Display the error.
+                use std::any::type_name;
+                warn!(
+                    "Internal logic error: Instance of `{sector_t:}` dropped without despawning the corresponding `{entity_t:}`. This might cause misbehaviour or be just a memory leak. Note: This error won't be shown anymore untill the app is restarted.{backtrace_info}",
+                    sector_t = type_name::<Self>(),
+                    entity_t = type_name::<Entity>()
+                )
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ pub struct ObservationPlugin {
 impl Plugin for ObservationPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, |mut cmds: Commands| {
-            cmds.spawn(CameraBundle::new(default()));
+            cmds.spawn(crate::simul::CameraBundle::new(default()));
         })
         .add_systems(Update, sys::follow_hero);
     }
@@ -21,9 +21,8 @@ impl Plugin for ObservationPlugin {
 /// Systems that control the effect of observation.
 pub mod sys;
 
-pub use bundles::CameraBundle;
-#[allow(missing_docs)]
 pub mod bundles {
+    /// -
     use bevy::prelude::*;
     use derive_more::Constructor;
 

@@ -1,5 +1,6 @@
 //! Module encapsulating `SimulPlane` struct logic.
 
+use crate::{color, simul::Sector};
 use bevy::prelude::*;
 use derive_more::IntoIterator;
 
@@ -10,24 +11,32 @@ use derive_more::IntoIterator;
 /// Facilitates the **location detection** through _sector detection system_.
 #[derive(Resource, Debug, IntoIterator)]
 pub struct SimulPlane {
+    /// # Invariants:
+    /// * Should have length > [`Self::HERO_SECT_IDX`] .
     #[into_iterator(owned, ref_mut, ref)]
     x_axis: std::collections::VecDeque<crate::simul::Sector>,
-    next_sect_x: f32,
+    /// The x coordinate of the first sector in `self`.
+    first_sect_x: f32,
+    /// # Invariants:
+    /// * should contrast with the color of last sector on [`x_axis`].
     next_sect_color_rbg: [f32; 3],
 }
 
 impl SimulPlane {
-    // Given
+    // Constants – Given
 
     const HERO_SECT_IDX: usize = 1;
     /// The default count of sectors in the plane.
     pub const DEFAULT_SECT_COUNT: usize = 7;
     /// The x cordinate on which the first sector will be rendered.
-    pub const FIRST_SECT_X: f32 = -650.0;
+    pub const DEFAULT_FIRST_SECT_X: f32 = -650.0;
     /// The minimum color contrast between neighbour sectors and poles.
     ///
     /// As determined be the `game::color::rbg_contrast` function.
     pub const MIN_SECT_COLOR_CONTRAST: f32 = 0.5;
+
+    // Constants – Calculated
+    const NEXT_SECT_OFFSET: f32 = crate::simul::Sector::SCALE.x;
 
     // Assertions
 
@@ -36,12 +45,7 @@ impl SimulPlane {
     /// Meaning: it **won't render** hero index **out of bounds**.
     const _HERO_IDX_AND_SEC_COUNT: () = assert!(Self::HERO_SECT_IDX < Self::DEFAULT_SECT_COUNT);
 
-    // Getters
-
-    /// Gets the plane sector on which the hero resides.
-    pub fn hero_sect(&self) -> &crate::simul::Sector {
-        &self.x_axis[Self::HERO_SECT_IDX]
-    }
+    // CRUD-C: Initializers
 
     /// **Spawns the entities** representing already initialized sector objects.
     ///
@@ -52,13 +56,29 @@ impl SimulPlane {
     pub fn spawn_sects(mut this: ResMut<Self>, mut cmds: Commands) {
         let SimulPlane {
             x_axis,
-            next_sect_x,
+            first_sect_x,
             next_sect_color_rbg,
         } = &mut *this;
         for sector in x_axis {
-            Self::summon_next(sector, next_sect_x, next_sect_color_rbg, &mut cmds)
+            Self::summon_next(sector, todo!(), next_sect_color_rbg, &mut cmds)
         }
     }
+
+    // CRUD-R: Getters
+
+    /// Gets the plane sector on which the hero resides.
+    pub fn hero_sect(&self) -> &crate::simul::Sector {
+        &self.x_axis[Self::HERO_SECT_IDX]
+    }
+
+    // CRUD-R: Properties
+
+    pub fn next_sect_x(&self) -> f32 {
+        next_sect_x(self.first_sect_x, self.x_axis.len())
+    }
+
+    // CRUD-U: Updaters
+
     /// Despawns the sector entities that the sector objects inside this plane refer to.
     ///
     /// This makes the contained sector objects refering to nothing. Effectivelly putting them to sleep.
@@ -76,12 +96,14 @@ impl SimulPlane {
         let mut new_sect: crate::simul::Sector = rng.gen();
         Self::summon_next(
             &mut new_sect,
-            &mut self.next_sect_x,
+            self.next_sect_x(),
             &mut self.next_sect_color_rbg,
             cmds,
         );
         self.x_axis.push_back(new_sect);
-        // Remove front
+        // Move logical front
+        self.first_sect_x += Self::NEXT_SECT_OFFSET;
+        // Remove displayed front
         self.x_axis.pop_front().expect("Expected `self.x_axis` to be non-empty, because a value has been just added to it.").despawn(cmds);
     }
     /// Creates and spawns the next sector that comes after the last one.
@@ -89,18 +111,17 @@ impl SimulPlane {
     /// Spawns new sector on the right of the simulation plane.
     fn summon_next(
         next_sect: &mut crate::simul::Sector,
-        next_sect_x: &mut f32,
+        next_sect_x: f32,
         next_sect_color_rbg: &mut [f32; 3],
         cmds: &mut Commands,
     ) {
-        next_sect.spawn(*next_sect_x, (*next_sect_color_rbg).into(), cmds);
-        *next_sect_x += crate::simul::Sector::SCALE.x;
-        *next_sect_color_rbg = game::color::contrasting_rand_rbg(
-            *next_sect_color_rbg,
-            SimulPlane::MIN_SECT_COLOR_CONTRAST,
-        );
+        next_sect.spawn(next_sect_x, (*next_sect_color_rbg).into(), cmds);
+        *next_sect_color_rbg =
+            color::contrasting_rand_rbg(*next_sect_color_rbg, SimulPlane::MIN_SECT_COLOR_CONTRAST);
     }
 }
+
+// CRUD-C: Constructors
 
 // Trait based constructors
 
@@ -113,8 +134,8 @@ impl Default for SimulPlane {
             x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
                 .take(Self::DEFAULT_SECT_COUNT)
                 .collect(),
-            next_sect_x: Self::FIRST_SECT_X,
-            next_sect_color_rbg: game::color::rand_rbg(),
+            first_sect_x: Self::DEFAULT_FIRST_SECT_X,
+            next_sect_color_rbg: color::rand_rbg(),
         }
     }
 }
@@ -127,8 +148,13 @@ impl rand::distributions::Distribution<SimulPlane> for rand::distributions::Stan
             x_axis: std::iter::from_fn(|| Some(distributions::Standard.sample(rng)))
                 .take(SimulPlane::DEFAULT_SECT_COUNT)
                 .collect(),
-            next_sect_x: SimulPlane::FIRST_SECT_X,
-            next_sect_color_rbg: game::color::rand_rbg(),
+            first_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
+            next_sect_color_rbg: color::rand_rbg(),
         }
     }
+}
+
+// CRUD-R: Properties
+fn next_sect_x(first_sect_x: f32, x_axis_len: usize) -> f32 {
+    first_sect_x + (x_axis_len as f32 * SimulPlane::NEXT_SECT_OFFSET)
 }
