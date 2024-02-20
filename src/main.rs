@@ -20,8 +20,10 @@ fn main() {
                 filter: "wgpu_hal=error,game=debug".into(),
                 level: Level::WARN,
             }),
-            WorldInspectorPlugin::default().run_if(input_toggle_active(true, KeyCode::Escape)),
+            WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),
             fly_b::SimulPlugins::default(),
+            fly_b::MiscPlugins::default(),
+            fly_b::UiPlugins::default(),
         ))
         .run();
 }

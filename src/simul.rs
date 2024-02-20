@@ -1,10 +1,41 @@
 //! Module containing plugins related to the in-game simulation.
 
+#[deprecated]
+pub mod finish;
+#[deprecated]
+pub mod start;
+pub mod state {
+    use bevy::prelude::*;
+
+    #[derive(Debug, Default)]
+    pub struct SimulStatePlugin {
+        _priv_fields_placeholder: (),
+    }
+
+    impl Plugin for SimulStatePlugin {
+        fn build(&self, app: &mut App) {
+            app.add_state::<crate::SimulState>();
+        }
+    }
+
+    pub mod states {
+        use bevy::prelude::*;
+
+        #[derive(Debug, Clone, Default, States, Eq, PartialEq, Hash)]
+        pub enum SimulState {
+            #[default]
+            Startup,
+            Running,
+            Cleanup,
+        }
+    }
+}
+
 pub mod observator;
 pub use observator::{bundles::CameraBundle, ObservationPlugin};
 
 pub mod hero;
-pub use hero::{bundles::HeroBundle, compos::HeroCore, HeroPlugin};
+pub use hero::{bundles::HeroBundle, compos::HeroCore, events::death::HeroDeath, HeroPlugin};
 
 pub mod obstacles;
 pub use obstacles::ObstaclesPlugin;
@@ -20,7 +51,7 @@ pub use emotions::EmotionsPlugin;
 
 use bevy::{app::PluginGroupBuilder, prelude::*};
 
-use crate::SimulPlanePlugin;
+use crate::{SimulPlanePlugin, SimulStatePlugin};
 
 /// Is meant to contain all the simulation plugins.
 ///
@@ -32,9 +63,10 @@ pub struct SimulPlugins {
     pub observation: ObservationPlugin,
     pub hero: HeroPlugin,
     pub obstacles: ObstaclesPlugin,
-    pub plane: SimulPlanePlugin,
+    pub simul_plane: SimulPlanePlugin,
     pub motion: MotionPlugin,
     pub emotions: EmotionsPlugin,
+    pub simul_state: SimulStatePlugin,
 }
 
 impl PluginGroup for SimulPlugins {
@@ -43,9 +75,10 @@ impl PluginGroup for SimulPlugins {
             observation,
             hero,
             obstacles,
-            plane,
+            simul_plane: plane,
             motion,
             emotions,
+            simul_state,
         } = self;
         PluginGroupBuilder::start::<Self>()
             .add(observation)
@@ -54,5 +87,6 @@ impl PluginGroup for SimulPlugins {
             .add(plane)
             .add(motion)
             .add(emotions)
+            .add(simul_state)
     }
 }

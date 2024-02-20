@@ -39,7 +39,8 @@ pub mod compos {
             ret
         }
         pub fn apply_effect(&self, victim: &mut Transform, time: &Time) {
-            victim.rotation.z -= self.effect_strength(victim) * time.delta_seconds();
+            // FixMe
+            // victim.rotation.z -= self.effect_strength(victim) * time.delta_seconds();
         }
     }
 }

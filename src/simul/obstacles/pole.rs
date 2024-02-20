@@ -12,13 +12,32 @@ pub struct Pole {
     pub height: f32,
 }
 impl Pole {
-    // Given
+    // Constants – Given
+
     /// The standard width of the in-game poles.
     pub const STD_WIDTH: core::ops::RangeInclusive<f32> = 0.2..=0.5;
     /// The display layer that is relative to the parent entity.
     pub const LOCAL_DISPLAY_LAYER: f32 = 1.;
     /// Marks the x-axis position of pole when rendered on its sector.
     pub const LOCAL_X: f32 = 0.;
+
+    // CRUD-R: Properties
+
+    pub fn upper_bound_y(&self, self_lower_bound_y: f32) -> f32 {
+        self_lower_bound_y + self.height
+    }
+    pub fn lower_bound_y(&self, self_upper_bound_y: f32) -> f32 {
+        self_upper_bound_y - self.height
+    }
+    pub fn left_bound_x(&self, self_x_coordinate: f32) -> f32 {
+        self_x_coordinate - self.width / 2.
+    }
+    pub fn right_bound_x(&self, self_x_coordinate: f32) -> f32 {
+        self_x_coordinate + self.width / 2.
+    }
+
+    // CRUD-U: Updaters
+
     /// Convenience method for calling `.spawn`.
     pub fn spawn_as_upper(&self, parent: &mut ChildBuilder, color: [f32; 3]) {
         self.spawn(parent, color, true)

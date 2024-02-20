@@ -14,4 +14,7 @@ impl EntityData {
     pub fn translation_x(&self) -> f32 {
         self.translation_x
     }
+    pub fn right_bound_x(&self) -> f32 {
+        self.translation_x() + 0.5 * crate::simul::Sector::SCALE.x
+    }
 }

@@ -1,16 +1,32 @@
 //! Module encapsulating logic around `Sector` struct.
 
+use crate::color;
+use bevy::prelude::*;
 use std::{
     backtrace::{Backtrace, BacktraceStatus},
     sync::atomic::AtomicBool,
 };
 
-use bevy::prelude::*;
-
 pub use entity_data::EntityData;
-
-use crate::color;
 pub mod entity_data;
+pub mod err {
+    pub use entity_not_spawned::EntityNotSpawned;
+    pub mod entity_not_spawned {
+        use derive_more::Constructor;
+
+        #[derive(Debug, Constructor, thiserror::Error)]
+        #[error("Entity corresponding to this `{}` hasn't been spawned.", std::any::type_name::<crate::simul::Sector>())]
+        pub struct EntityNotSpawned {}
+    }
+    pub use entity_already_present::EntityAlreadySpawned;
+    pub mod entity_already_present {
+        use derive_more::Constructor;
+
+        #[derive(Debug, Constructor, thiserror::Error)]
+        #[error("Entity corresponding to this `{}` has already been spawned.", std::any::type_name::<crate::simul::Sector>())]
+        pub struct EntityAlreadySpawned {}
+    }
+}
 
 /// A division of the simulation plane.
 ///
@@ -25,7 +41,7 @@ pub struct Sector {
     lower_pole: crate::simul::obstacles::Pole,
 }
 impl Sector {
-    // Given
+    // Constants – Given
 
     /// The scale of all spawned sectors.
     pub const SCALE: Vec3 = Vec3::new(300.0, 900.0, 0.1);
@@ -35,10 +51,10 @@ impl Sector {
     /// The positive (and high enough) value of this constant ensures that the hero can always pass through the gap and remain untouched by the obstacles.
     pub const MIN_GAP: f32 = 0.2;
     /// The y coordinate for all spawned sectors.
-    const TRANSLATION_Y: f32 = 0.;
+    pub const TRANSLATION_Y: f32 = 0.;
     pub const DISPLAY_LAYER: f32 = 0.;
 
-    // Calculated
+    // Constants – Calculated
 
     /// The maximum fraction of height that can be occupied by obstacles.
     ///
@@ -46,12 +62,28 @@ impl Sector {
     /// This constant faciliates the compution of quantity of space/passage that is free to be occupied by some obstacles.
     pub const MAX_OCCUPIED_HEIGHT: f32 = 1.0 - Self::MIN_GAP;
 
-    // Calculations
+    pub const UPPER_BOUND_Y: f32 = Self::TRANSLATION_Y + Self::SCALE.y / 2.;
+    pub const LOWER_BOUND_Y: f32 = Self::TRANSLATION_Y - Self::SCALE.y / 2.;
 
-    /// States how much vertical space/passage is still free to be occupied by some obstacles.
-    pub fn left_vertical_space(taken_space: f32) -> f32 {
-        Self::MAX_OCCUPIED_HEIGHT - taken_space
+    // CRUD-R: Getters
+
+    pub fn upper_pole(&self) -> &crate::simul::obstacles::Pole {
+        &self.upper_pole
     }
+
+    pub fn lower_pole(&self) -> &crate::simul::obstacles::Pole {
+        &self.lower_pole
+    }
+
+    fn entity(&self) -> Result<&EntityData, err::EntityNotSpawned> {
+        self.entity.as_ref().ok_or(err::EntityNotSpawned::new())
+    }
+
+    pub fn translation_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        self.entity().map(EntityData::translation_x)
+    }
+
+    // CRUD-R: Properties
 
     // Properties
 
@@ -60,30 +92,56 @@ impl Sector {
         self.entity.is_some()
     }
 
-    // (De)Binding with entity
+    pub fn right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        self.entity().map(|entity_data| entity_data.right_bound_x())
+    }
+
+    pub fn upper_pole_lower_bound_y(&self) -> f32 {
+        self.upper_pole().lower_bound_y(Self::UPPER_BOUND_Y)
+    }
+    pub fn lower_pole_upper_bound_y(&self) -> f32 {
+        self.lower_pole().upper_bound_y(Self::LOWER_BOUND_Y)
+    }
+    pub fn upper_pole_left_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        Ok(self.upper_pole().left_bound_x(self.translation_x()?))
+    }
+    pub fn lower_pole_left_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        Ok(self.lower_pole().left_bound_x(self.translation_x()?))
+    }
+
+    // CRUD-U: Updaters
 
     /// Spawns the corresponding concrete entity for this logical sector object.
     ///
     /// Binds `self` to spawned entity.
-    pub fn spawn(&mut self, translation_x: f32, color_rbg: [f32; 3], cmds: &mut Commands) {
+    pub fn spawn(
+        &mut self,
+        translation_x: f32,
+        color_rbg: [f32; 3],
+        cmds: &mut Commands,
+    ) -> Result<(), err::EntityAlreadySpawned> {
         if self.entity_present() {
-            panic!("Attempt to spawn simulation plane sector that has already been spawned.")
+            Err(err::EntityAlreadySpawned::new())
+        } else {
+            let _ = self.entity.insert(EntityData::new(
+                self.spawn_sector_entity(cmds, translation_x, color_rbg),
+                translation_x,
+            ));
+            Ok(())
         }
-        let _ = self.entity.insert(EntityData::new(
-            self.spawn_sector_entity(cmds, translation_x, color_rbg),
-            translation_x,
-        ));
     }
 
     /// Despawns the concrete entity `self` is bounded to. Unbinds `self`.
-    pub fn despawn(&mut self, cmds: &mut Commands) {
-        let entity = self.entity.take().unwrap_or_else(|| {
-            panic!("Attempt to despawn a simulation plane sector entity that has't been spawned.")
-        });
-        cmds.entity(entity.id()).despawn_recursive();
+    pub fn despawn(&mut self, cmds: &mut Commands) -> Result<(), err::EntityNotSpawned> {
+        if let Some(entity) = self.entity.take() {
+            cmds.entity(entity.id()).despawn_recursive();
+            Ok(())
+        } else {
+            Err(err::EntityNotSpawned::new())
+        }
     }
 
-    // Aid functions.
+    // CRUD-U: Aiding updaters.
 
     fn spawn_sector_entity(
         &self,
@@ -129,11 +187,11 @@ impl rand::distributions::Distribution<Sector> for rand::distributions::Standard
 
         let lower_pole = Pole {
             width: rng.gen_range(Pole::STD_WIDTH),
-            height: rng.gen_range(0.0..=Sector::left_vertical_space(0.0)),
+            height: rng.gen_range(0.0..=left_vertical_space(0.0)),
         };
         let upper_pole = Pole {
             width: rng.gen_range(Pole::STD_WIDTH),
-            height: rng.gen_range(0.0..=Sector::left_vertical_space(lower_pole.height)),
+            height: rng.gen_range(0.0..=left_vertical_space(lower_pole.height)),
         };
         Sector {
             entity: None,
@@ -141,6 +199,15 @@ impl rand::distributions::Distribution<Sector> for rand::distributions::Standard
             lower_pole,
         }
     }
+}
+
+// CRUD-R: Properties
+
+// Calculations
+
+/// States how much vertical space/passage is still free to be occupied by some obstacles.
+pub fn left_vertical_space(taken_space: f32) -> f32 {
+    Sector::MAX_OCCUPIED_HEIGHT - taken_space
 }
 
 // CRUD-D: Destructors

@@ -18,7 +18,7 @@ pub fn follow_hero(
     {
         let cam = &mut cam.translation;
         let hero = &hero.translation;
-        cam.x = hero.x;
+        cam.x = hero.x + crate::simul::Sector::SCALE.x;
         cam.y = hero.y;
     }
 }

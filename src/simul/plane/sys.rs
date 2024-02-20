@@ -1,6 +1,9 @@
 //! Systems that make the plane objects usefull and impactful.
 
 use bevy::prelude::*;
+use std::num::NonZeroU128;
+
+use crate::misc::PassedSectCount;
 
 /// Automatically advances the auto-generated in-simulation plane.
 ///
@@ -12,10 +15,27 @@ use bevy::prelude::*;
 pub fn advance(
     mut plane: ResMut<crate::SimulPlane>,
     hero: Query<(&Transform,), (With<crate::simul::HeroCore>,)>,
+    mut pass_event_writer: EventWriter<PassedSectCount>,
+    mut cmds: Commands,
 ) {
-    let Ok(hero) = hero.get_single() else {
+    let Ok((hero_transform,)) = hero.get_single() else {
         // No hero, no advances.
         return;
     };
-    todo!()
+    let mut passed_sect_count = 0;
+    loop {
+        let current_hero_sector = plane.hero_sect();
+        let curr_hero_sect_bound = current_hero_sector
+        .right_bound_x()
+        .expect("Sector entities should have been spawned during the startup phase or just after addition of the new sector.");
+        if hero_transform.translation.x <= curr_hero_sect_bound {
+            // Everything ok :)
+            break;
+        };
+        plane.advance(&mut rand::thread_rng(), &mut cmds);
+        passed_sect_count += 1;
+    }
+    if let Some(meaningful_count) = NonZeroU128::new(passed_sect_count) {
+        pass_event_writer.send(PassedSectCount::new_event(meaningful_count))
+    }
 }

@@ -2,8 +2,18 @@
 
 pub mod color;
 
+#[allow(deprecated)]
 pub use simul::{
+    finish::{events::SimulFinish, SimulFinishPlugin},
     plane::{res::plane::SimulPlane, SimulPlanePlugin},
+    start::{events::SimulStart, SimulStartPlugin},
+    state::{states::SimulState, SimulStatePlugin},
     SimulPlugins,
 };
-mod simul;
+pub mod simul;
+
+pub use ui::UiPlugins;
+pub mod ui;
+
+pub use misc::MiscPlugins;
+pub mod misc;
