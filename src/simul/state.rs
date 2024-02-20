@@ -7,8 +7,11 @@ pub struct SimulStatePlugin {
 
 impl Plugin for SimulStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state::<crate::SimulState>()
-            .add_systems(Update, sys::circulate);
+        app
+            // Resources
+            .add_state::<crate::SimulState>()
+            // Move using graph edges.
+            .add_systems(Update, (sys::circulate, sys::restart_game));
     }
 }
 
@@ -41,7 +44,17 @@ pub mod states {
 pub mod sys {
     use bevy::prelude::*;
 
-    use crate::SimulState;
+    use crate::{simul::HeroDeath, SimulState};
+
+    pub fn restart_game(
+        mut restart_cause: EventReader<HeroDeath>,
+        mut next_state: ResMut<NextState<SimulState>>,
+    ) {
+        if !restart_cause.is_empty() {
+            let _ = next_state.0.insert(SimulState::Cleanup);
+            restart_cause.clear();
+        }
+    }
 
     pub fn circulate(state: Res<State<SimulState>>, mut next_state: ResMut<NextState<SimulState>>) {
         if **state != SimulState::Running {

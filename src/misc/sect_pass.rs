@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::misc::PassedSectCount;
+use crate::{misc::PassedSectCount, SimulState};
 
 #[derive(Debug, Default)]
 pub struct SectPassPlugin {
@@ -8,8 +8,13 @@ pub struct SectPassPlugin {
 }
 impl Plugin for SectPassPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<PassedSectCount>()
+        app
+            // Resources
+            .init_resource::<PassedSectCount>()
             .add_event::<PassedSectCount>()
+            // Init
+            .add_systems(OnEnter(SimulState::Startup), sys::reset_count)
+            // Update count
             .add_systems(Update, sys::update_count);
     }
 }
@@ -19,6 +24,9 @@ pub mod sys {
 
     use crate::misc::PassedSectCount;
 
+    pub fn reset_count(mut count: ResMut<PassedSectCount>) {
+        **count = 0;
+    }
     pub fn update_count(
         mut count: ResMut<PassedSectCount>,
         mut event_reader: EventReader<PassedSectCount>,

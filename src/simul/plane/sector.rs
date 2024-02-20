@@ -108,6 +108,12 @@ impl Sector {
     pub fn lower_pole_left_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
         Ok(self.lower_pole().left_bound_x(self.translation_x()?))
     }
+    pub fn upper_pole_right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        Ok(self.upper_pole().right_bound_x(self.translation_x()?))
+    }
+    pub fn lower_pole_right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
+        Ok(self.lower_pole().right_bound_x(self.translation_x()?))
+    }
 
     // CRUD-U: Updaters
 
@@ -185,14 +191,14 @@ impl rand::distributions::Distribution<Sector> for rand::distributions::Standard
     fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Sector {
         use crate::simul::obstacles::Pole;
 
-        let lower_pole = Pole {
-            width: rng.gen_range(Pole::STD_WIDTH),
-            height: rng.gen_range(0.0..=left_vertical_space(0.0)),
-        };
-        let upper_pole = Pole {
-            width: rng.gen_range(Pole::STD_WIDTH),
-            height: rng.gen_range(0.0..=left_vertical_space(lower_pole.height)),
-        };
+        let lower_pole = Pole::new([
+            rng.gen_range(Pole::STD_SCALE_X),
+            rng.gen_range(0.0..=left_vertical_space(0.0)),
+        ]);
+        let upper_pole = Pole::new([
+            rng.gen_range(Pole::STD_SCALE_X),
+            rng.gen_range(0.0..=left_vertical_space(lower_pole.scale().y)),
+        ]);
         Sector {
             entity: None,
             upper_pole,

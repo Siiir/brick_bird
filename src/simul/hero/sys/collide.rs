@@ -32,9 +32,13 @@ pub fn with_upper_pole(
     mut event_writer: EventWriter<HeroDeath>,
 ) {
     if let Ok((hero_transform,)) = hero.get_single() {
-        if hero::upper_bound_y(hero_transform) > simul_plane.hero_sect().upper_pole_lower_bound_y()
-            && hero::right_bound_x(hero_transform)
-                > simul_plane.hero_sect().upper_pole_left_bound_x().unwrap()
+        let hero_sect = &simul_plane.hero_sect();
+        if (hero::upper_bound_y(hero_transform))
+            > (hero_sect.upper_pole_lower_bound_y())
+            && (hero::right_bound_x(hero_transform))
+                > (hero_sect.upper_pole_left_bound_x().unwrap())
+        // And is not behind, because being behind is allowed (even with a touch)
+            && !(hero::left_bound_x(hero_transform) >= hero_sect.upper_pole_right_bound_x().unwrap())
         {
             event_writer.send(HeroDeath::default());
         }
@@ -47,9 +51,11 @@ pub fn with_lower_pole(
     mut event_writer: EventWriter<HeroDeath>,
 ) {
     if let Ok((hero_transform,)) = hero.get_single() {
-        if hero::lower_bound_y(hero_transform) < simul_plane.hero_sect().lower_pole_upper_bound_y()
-            && hero::right_bound_x(hero_transform)
-                > simul_plane.hero_sect().lower_pole_left_bound_x().unwrap()
+        let hero_sect = &simul_plane.hero_sect();
+        if hero::lower_bound_y(hero_transform) < hero_sect.lower_pole_upper_bound_y()
+            && hero::right_bound_x(hero_transform) > hero_sect.lower_pole_left_bound_x().unwrap()
+        // And is not behind, because being behind is allowed (even with a touch)
+        && !(hero::left_bound_x(hero_transform) >= hero_sect.lower_pole_right_bound_x().unwrap())
         {
             event_writer.send(HeroDeath::default());
         }

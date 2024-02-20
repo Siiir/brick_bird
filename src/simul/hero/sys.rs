@@ -2,26 +2,46 @@ pub mod collide;
 
 use bevy::prelude::*;
 
+use crate::simul::{self, HeroCore, HeroHop};
+
 pub fn spawn(mut cmds: Commands) {
     cmds.spawn(crate::simul::HeroBundle::default());
 }
-
-/// Forces hero to involuntary fly forward untill they die.
-///
-/// This can be seen as sad BUT makes a good selling point.
-pub fn fly_flappik_fly(
-    time: Res<Time>,
-    mut hero: Query<(&mut Transform, &crate::simul::Motion), (With<crate::simul::HeroCore>,)>,
-) {
-    let Ok((mut transform, motion)) = hero.get_single_mut() else {
-        // The hero can be absent. Then he won't fly.
+pub fn despawn_if_present(mut cmds: Commands, hero: Query<Entity, With<crate::simul::HeroCore>>) {
+    let Ok(hero) = hero.get_single() else {
+        // no hero ==> nth to clean
         return;
     };
-    let street = motion.velocity * time.delta_seconds();
-    let forward = transform.right();
-    transform.translation += street * forward;
+    cmds.entity(hero).despawn_recursive();
 }
 
+/// Makes hero experience a positive stimulation, whenever the players clicks space key.
+pub fn hop(
+    mut hero: Query<&mut Transform, With<crate::simul::HeroCore>>,
+    mut hop_listener: EventReader<HeroHop>,
+) {
+    let Ok(mut transform) = hero.get_single_mut() else {
+        // No hero, no hopping.
+        return;
+    };
+    for _hop in &mut hop_listener {
+        transform.translation.y += simul::hero::HOP_UP_HEIGHT;
+    }
+}
+
+pub fn up_implies_downs(
+    mut hero_velocity: Query<(&mut crate::simul::Velocity,), With<HeroCore>>,
+    mut hop_listener: EventReader<HeroHop>,
+) {
+    if !hop_listener.is_empty() {
+        if let Ok((mut hero_velocity,)) = hero_velocity.get_single_mut() {
+            hero_velocity.y = -2. * crate::simul::hero::INIT_VELOCITY;
+        }
+        hop_listener.clear();
+    }
+}
+
+#[deprecated]
 /// Makes hero experience a positive stimulation, whenever the players clicks space key.
 pub fn head_up_flappik(
     kbd_input: Res<Input<KeyCode>>,

@@ -15,5 +15,5 @@ pub mod simul;
 pub use ui::UiPlugins;
 pub mod ui;
 
-pub use misc::MiscPlugins;
+pub use misc::{keybinds::KeybindsPlugin, MiscPlugins};
 pub mod misc;

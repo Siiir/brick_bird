@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 use derive_more::Constructor;
 
+use crate::simul::hero;
+
 #[derive(Bundle, Constructor)]
 pub struct HeroBundle {
     name: Name,
     core: crate::simul::HeroCore,
     base: SpriteBundle,
-    motion: crate::simul::Motion,
-    emotion: crate::simul::emotions::compos::Boredom,
+    motion: crate::simul::Velocity,
 }
 impl HeroBundle {
     pub const DISPLAY_LAYER: f32 = 10.0;
@@ -34,13 +35,12 @@ impl Default for HeroBundle {
                         Self::DISPLAY_LAYER,
                     ]
                     .into(),
-                    scale: [100., 50., 0.1].into(),
+                    scale: [50., 25., 0.1].into(),
                     ..default()
                 },
                 ..default()
             },
-            crate::simul::Motion::default(),
-            crate::simul::emotions::compos::Boredom::default(),
+            [hero::INIT_VELOCITY, 0.].into(),
         )
     }
 }

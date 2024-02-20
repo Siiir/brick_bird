@@ -15,10 +15,17 @@ impl Plugin for SimulPlanePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(crate::SimulPlane::empty());
 
+        // Startup
         app.add_systems(
             OnEnter(crate::SimulState::Startup),
             (sys::reset_logical_plane, crate::SimulPlane::spawn_sects).chain(),
         );
+        // Cleanup
+        app.add_systems(
+            OnEnter(crate::SimulState::Cleanup),
+            crate::SimulPlane::despawn_sects,
+        );
+        // Update
         app.add_systems(
             Update,
             (sys::advance,).run_if(in_state(crate::SimulState::Running)),
