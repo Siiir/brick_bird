@@ -13,12 +13,15 @@ pub struct SimulPlanePlugin {
 }
 impl Plugin for SimulPlanePlugin {
     fn build(&self, app: &mut App) {
-        // Experiments
-        use rand::prelude::*;
-        let simul_plane: crate::SimulPlane =
-            rand::distributions::Standard.sample(&mut thread_rng());
-        app.insert_resource(simul_plane);
-        app.add_systems(Startup, (crate::SimulPlane::spawn_sects,));
-        app.add_systems(Update, (sys::advance,));
+        app.insert_resource(crate::SimulPlane::empty());
+
+        app.add_systems(
+            OnEnter(crate::SimulState::Startup),
+            (sys::reset_logical_plane, crate::SimulPlane::spawn_sects).chain(),
+        );
+        app.add_systems(
+            Update,
+            (sys::advance,).run_if(in_state(crate::SimulState::Running)),
+        );
     }
 }

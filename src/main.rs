@@ -17,7 +17,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins.set(LogPlugin {
-                filter: "wgpu_hal=error,game=debug".into(),
+                filter: "wgpu_hal=error,game=trace".into(),
                 level: Level::WARN,
             }),
             WorldInspectorPlugin::default().run_if(input_toggle_active(false, KeyCode::Escape)),

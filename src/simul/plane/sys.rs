@@ -3,7 +3,11 @@
 use bevy::prelude::*;
 use std::num::NonZeroU128;
 
-use crate::misc::PassedSectCount;
+use crate::{misc::PassedSectCount, SimulPlane};
+
+pub fn reset_logical_plane(mut plane: ResMut<SimulPlane>) {
+    *plane = SimulPlane::default();
+}
 
 /// Automatically advances the auto-generated in-simulation plane.
 ///

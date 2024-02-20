@@ -2,34 +2,11 @@
 
 #[deprecated]
 pub mod finish;
+
 #[deprecated]
 pub mod start;
-pub mod state {
-    use bevy::prelude::*;
 
-    #[derive(Debug, Default)]
-    pub struct SimulStatePlugin {
-        _priv_fields_placeholder: (),
-    }
-
-    impl Plugin for SimulStatePlugin {
-        fn build(&self, app: &mut App) {
-            app.add_state::<crate::SimulState>();
-        }
-    }
-
-    pub mod states {
-        use bevy::prelude::*;
-
-        #[derive(Debug, Clone, Default, States, Eq, PartialEq, Hash)]
-        pub enum SimulState {
-            #[default]
-            Startup,
-            Running,
-            Cleanup,
-        }
-    }
-}
+pub mod state;
 
 pub mod observator;
 pub use observator::{bundles::CameraBundle, ObservationPlugin};

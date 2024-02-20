@@ -28,8 +28,9 @@ impl SimulPlane {
     // Constants – Given
 
     pub const HERO_SECT_IDX: usize = 3;
+    const COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO: usize = 2;
     /// The default count of sectors in the plane.
-    pub const DEFAULT_SECT_COUNT: usize = 9;
+    pub const SECT_COUNT: usize = 9;
     /// The x cordinate on which the first sector will be rendered.
     pub const DEFAULT_FIRST_SECT_X: f32 = 0.0;
     /// The minimum color contrast between neighbour sectors and poles.
@@ -38,6 +39,10 @@ impl SimulPlane {
     pub const MIN_SECT_COLOR_CONTRAST: f32 = 0.5;
 
     // Constants – Calculated
+    pub const INITIALLY_EMPTY_SECTS_COUNT: usize =
+        Self::HERO_SECT_IDX + 1 + Self::COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO;
+    pub const INITIALLY_FILLED_SECTS_COUNT: usize =
+        Self::SECT_COUNT - Self::INITIALLY_EMPTY_SECTS_COUNT;
     const NEXT_SECT_OFFSET: f32 = crate::simul::Sector::SCALE.x;
 
     // Assertions
@@ -45,7 +50,22 @@ impl SimulPlane {
     /// Makes sure that the default sector count is compatible with index.
     ///
     /// Meaning: it **won't render** hero index **out of bounds**.
-    const _HERO_IDX_AND_SEC_COUNT: () = assert!(Self::HERO_SECT_IDX < Self::DEFAULT_SECT_COUNT);
+    const _HERO_IDX_AND_SEC_COUNT: () =
+        assert!(Self::INITIALLY_EMPTY_SECTS_COUNT < Self::SECT_COUNT);
+
+    // CRUD-C: Constructors
+
+    /// Creates an open, unobstructed simulation plane, which is really borring.
+    pub fn empty() -> Self {
+        Self {
+            x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
+                .take(Self::SECT_COUNT)
+                .collect(),
+            first_sect_x: Self::DEFAULT_FIRST_SECT_X,
+            next_sect_x: Self::DEFAULT_FIRST_SECT_X,
+            next_sect_color_rbg: color::rand_rbg(),
+        }
+    }
 
     // CRUD-C: Initializers
 
@@ -62,6 +82,7 @@ impl SimulPlane {
             next_sect_x,
             next_sect_color_rbg,
         } = &mut *this;
+        trace!("Spawned sects.");
         for sector in x_axis {
             Self::spawn_next_sect(sector, next_sect_x, next_sect_color_rbg, &mut cmds).unwrap()
         }
@@ -124,14 +145,19 @@ impl SimulPlane {
 
 // Trait based constructors
 
-/// Creates an open, unobstructed simulation plane, which is really borring.
-///
 /// Serves as a good peaceful space for the player to start in before they start to encounter obstacles.
 impl Default for SimulPlane {
     fn default() -> Self {
+        use rand::Rng;
+
         Self {
             x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
-                .take(Self::DEFAULT_SECT_COUNT)
+                .take(Self::INITIALLY_EMPTY_SECTS_COUNT)
+                .chain(
+                    rand::thread_rng()
+                        .sample_iter(rand::distributions::Standard)
+                        .take(Self::INITIALLY_FILLED_SECTS_COUNT),
+                )
                 .collect(),
             first_sect_x: Self::DEFAULT_FIRST_SECT_X,
             next_sect_x: Self::DEFAULT_FIRST_SECT_X,
@@ -146,7 +172,7 @@ impl rand::distributions::Distribution<SimulPlane> for rand::distributions::Stan
 
         SimulPlane {
             x_axis: std::iter::from_fn(|| Some(distributions::Standard.sample(rng)))
-                .take(SimulPlane::DEFAULT_SECT_COUNT)
+                .take(SimulPlane::SECT_COUNT)
                 .collect(),
             first_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
             next_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
