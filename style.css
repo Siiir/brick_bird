@@ -1,0 +1,17 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrolling */
+  height: 100%; /* Ensures the body takes up full viewport height */
+  width: 100%; /* Ensures the body takes up full viewport width */
+}
+#bird_canvas {
+  display: block; /* Removes the space below the canvas */
+  margin: 0;
+  padding: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+*, *::before, *::after {
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+}
