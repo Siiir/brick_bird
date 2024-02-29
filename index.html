@@ -11,7 +11,7 @@
       height: 100%; /* Ensures the body takes up full viewport height */
       width: 100%; /* Ensures the body takes up full viewport width */
     }
-    #bullet_bird_canvas {
+    #bird_canvas {
       display: block; /* Removes the space below the canvas */
       margin: 0;
       padding: 0;
@@ -24,9 +24,9 @@
   </style>
 </head>
 <body>
-  <canvas id="bullet_bird_canvas" ></canvas>
+  <canvas id="bird_canvas" ></canvas>
   <script type="module">
-    import init from './game.js';
+    import init from './brick_bird.js';
 
     init().catch((error) => {
       if (!error.message.startsWith("Using exceptions for control flow, don't mind me. This isn't actually an error!")) {
