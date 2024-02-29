@@ -22,7 +22,7 @@ fn main() {
         .set(WindowPlugin {
             primary_window: Some(Window {
                 // provide the ID selector string here
-                canvas: Some("#bullet_bird_canvas".into()),
+                canvas: Some("#bird_canvas".into()),
                 mode: bevy::window::WindowMode::BorderlessFullscreen,
                 prevent_default_event_handling: false,
                 ..default()

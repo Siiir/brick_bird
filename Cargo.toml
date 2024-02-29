@@ -6,8 +6,17 @@ edition = "2021"
 [lib]
 name = "fly_b"
 
+[[bin]]
+name = "brick_bird"
+path = "./src/main.rs"
+
+# Wasm-specific release profile settings
+[target.'cfg(target_arch = "wasm32")'.profile.release]
+opt-level = 'z'  # Optimize for size
+lto = "thin"     # Thin Link Time Optimization
+
 [dependencies]
-bevy = { version = "0.11.3" } # , features = ["dynamic_linking"] }
+bevy = { version = "0.11.3" }
 bevy-inspector-egui = "0.20.0"
 derive_more = "0.99.17"
 num-bigint = "0.4.4"
