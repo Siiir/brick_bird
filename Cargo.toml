@@ -10,11 +10,6 @@ name = "fly_b"
 name = "brick_bird"
 path = "./src/main.rs"
 
-# Wasm-specific release profile settings
-[target.'cfg(target_arch = "wasm32")'.profile.release]
-opt-level = 'z'  # Optimize for size
-lto = "thin"     # Thin Link Time Optimization
-
 [dependencies]
 bevy = { version = "0.11.3" }
 bevy-inspector-egui = "0.20.0"
