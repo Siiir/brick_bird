@@ -33,6 +33,15 @@
         throw error;
       }
     });
+    const canvas = document.getElementById('bird_canvas');
+    // Attempt to go full-screen
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    } else if (canvas.webkitRequestFullscreen) { /* Safari */
+      canvas.webkitRequestFullscreen();
+    } else if (canvas.msRequestFullscreen) { /* IE11 */
+      canvas.msRequestFullscreen();
+    }
   </script>
 </body>
 </html>
