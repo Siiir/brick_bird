@@ -21,7 +21,7 @@ fn main() {
         })
         .set(WindowPlugin {
             primary_window: Some(Window {
-                // provide the ID selector string here
+                title: "Brick Bird".to_owned(),
                 canvas: Some("#bird_canvas".into()),
                 mode: bevy::window::WindowMode::BorderlessFullscreen,
                 prevent_default_event_handling: false,
