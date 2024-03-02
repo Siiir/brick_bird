@@ -41,6 +41,9 @@ pub mod events {
 /// Bundles.
 pub mod bundles;
 
+// Resources
+pub mod res;
+
 /// Systems controling hero and their effect on the surrounding environment.
 pub mod sys;
 
@@ -68,7 +71,8 @@ pub struct HeroPlugin {
 impl Plugin for HeroPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<compos::HeroCore>();
-        app.add_event::<crate::simul::HeroDeath>()
+        app.init_resource::<crate::simul::HeroColor>()
+            .add_event::<crate::simul::HeroDeath>()
             .add_event::<crate::simul::HeroHop>();
 
         use self::sys::collide;
@@ -92,7 +96,9 @@ impl Plugin for HeroPlugin {
                     collide::with_upper_pole,
                 )
                     .run_if(in_state(SimulState::Running)),
-            );
+            )
+            // Misc.
+            .add_systems(Update, (sys::update_displayed_color,));
     }
 }
 

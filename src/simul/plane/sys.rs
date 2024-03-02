@@ -17,6 +17,7 @@ pub fn reset_logical_plane(mut plane: ResMut<SimulPlane>) {
 ///  in simulation plane as a continuous & infinite game world,
 ///  while the memory complexity of this infinite world remains constant.
 pub fn advance(
+    hero_color: Res<crate::simul::HeroColor>,
     mut plane: ResMut<crate::SimulPlane>,
     hero: Query<(&Transform,), (With<crate::simul::HeroCore>,)>,
     mut pass_event_writer: EventWriter<PassedSectCount>,
@@ -36,7 +37,7 @@ pub fn advance(
             // Everything ok :)
             break;
         };
-        plane.advance(&mut rand::thread_rng(), &mut cmds);
+        plane.advance(hero_color.rbg(), &mut rand::thread_rng(), &mut cmds);
         passed_sect_count += 1;
     }
     if let Some(meaningful_count) = NonZeroU128::new(passed_sect_count) {

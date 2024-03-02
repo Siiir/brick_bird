@@ -19,7 +19,7 @@ pub fn rbg_contrast(lhs: [f32; 3], rhs: [f32; 3]) -> f32 {
 ///
 /// `rbg_contrast` is used to determine the value of contrast between the two colors.
 /// If requested `min_contrast` is very large (or unachievable) the function may deadlock.
-pub fn contrasting_rand_rbg(prev: [f32; 3], min_contrast: f32) -> [f32; 3] {
+pub fn rand_rbg_contrasting(prev: [f32; 3], min_contrast: f32) -> [f32; 3] {
     loop {
         let next = rand_rbg();
         if rbg_contrast(prev, next) >= min_contrast {

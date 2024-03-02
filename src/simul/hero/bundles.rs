@@ -12,20 +12,12 @@ pub struct HeroBundle {
 }
 impl HeroBundle {
     pub const DISPLAY_LAYER: f32 = 10.0;
-}
-/// Creates a hero bundle that will set the hero on the starting point of the game.
-///
-/// Hero created this way will have default stats and start-friendly behaviour.
-impl Default for HeroBundle {
-    fn default() -> Self {
+    pub fn with_color(color: Color) -> Self {
         Self::new(
             Name::from("Flappek"),
             crate::simul::HeroCore::default(),
             SpriteBundle {
-                sprite: Sprite {
-                    color: Color::ORANGE,
-                    ..default()
-                },
+                sprite: Sprite { color, ..default() },
                 transform: Transform {
                     translation: [
                         crate::SimulPlane::DEFAULT_FIRST_SECT_X

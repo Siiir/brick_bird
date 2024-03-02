@@ -19,9 +19,6 @@ pub struct SimulPlane {
     first_sect_x: f32,
     /// The x coordinate of the next sector in `self` to be spawned.
     next_sect_x: f32,
-    /// # Invariants:
-    /// * should contrast with the color of last sector on [`x_axis`].
-    next_sect_color_rbg: [f32; 3],
 }
 
 impl SimulPlane {
@@ -36,7 +33,7 @@ impl SimulPlane {
     /// The minimum color contrast between neighbour sectors and poles.
     ///
     /// As determined be the `game::color::rbg_contrast` function.
-    pub const MIN_SECT_COLOR_CONTRAST: f32 = 0.5;
+    pub const MIN_SECT_COLOR_CONTRAST: f32 = 0.9;
 
     // Constants – Calculated
     pub const INITIALLY_EMPTY_SECTS_COUNT: usize =
@@ -63,7 +60,6 @@ impl SimulPlane {
                 .collect(),
             first_sect_x: Self::DEFAULT_FIRST_SECT_X,
             next_sect_x: Self::DEFAULT_FIRST_SECT_X,
-            next_sect_color_rbg: color::rand_rbg(),
         }
     }
 
@@ -75,16 +71,19 @@ impl SimulPlane {
     ///
     /// # Expectations
     /// This is expected to be called at the start of the simulation to create entities corresponding to the logical plane sectors.
-    pub fn spawn_sects(mut this: ResMut<Self>, mut cmds: Commands) {
+    pub fn spawn_sects(
+        mut this: ResMut<SimulPlane>,
+        hero_color: Res<crate::simul::HeroColor>,
+        mut cmds: Commands,
+    ) {
         let SimulPlane {
             x_axis,
             first_sect_x: _,
             next_sect_x,
-            next_sect_color_rbg,
         } = &mut *this;
         trace!("Spawned sects.");
         for sector in x_axis {
-            Self::spawn_next_sect(sector, next_sect_x, next_sect_color_rbg, &mut cmds).unwrap()
+            Self::spawn_next_sect(hero_color.rbg(), sector, next_sect_x, &mut cmds).unwrap()
         }
     }
 
@@ -109,13 +108,18 @@ impl SimulPlane {
     ///
     /// This method relyies on the simulation plane's sectors being already spawned.
     /// Use `.spawn_sects` to spawn them.
-    pub fn advance<R: rand::Rng + ?Sized>(&mut self, rng: &mut R, cmds: &mut Commands) {
+    pub fn advance<R: rand::Rng + ?Sized>(
+        &mut self,
+        hero_color_rbg: [f32; 3],
+        rng: &mut R,
+        cmds: &mut Commands,
+    ) {
         // Add back
         let mut new_sect: crate::simul::Sector = rng.gen();
         Self::spawn_next_sect(
+            hero_color_rbg,
             &mut new_sect,
             &mut self.next_sect_x,
-            &mut self.next_sect_color_rbg,
             cmds,
         ).expect("This new sector should not have a corresponding entity yet, because it has just been generated.");
         self.x_axis.push_back(new_sect);
@@ -128,15 +132,15 @@ impl SimulPlane {
     ///
     /// Spawns new sector on the right of the simulation plane.
     fn spawn_next_sect(
+        hero_color_rbg: [f32; 3],
         next_sect: &mut crate::simul::Sector,
         next_sect_x: &mut f32,
-        next_sect_color_rbg: &mut [f32; 3],
         cmds: &mut Commands,
     ) -> Result<(), crate::simul::plane::sector::err::EntityAlreadySpawned> {
-        next_sect.spawn(*next_sect_x, (*next_sect_color_rbg).into(), cmds)?;
+        let next_sect_color_rbg =
+            color::rand_rbg_contrasting(hero_color_rbg, SimulPlane::MIN_SECT_COLOR_CONTRAST);
+        next_sect.spawn(*next_sect_x, next_sect_color_rbg.into(), cmds)?;
         *next_sect_x += Self::NEXT_SECT_OFFSET;
-        *next_sect_color_rbg =
-            color::contrasting_rand_rbg(*next_sect_color_rbg, SimulPlane::MIN_SECT_COLOR_CONTRAST);
         Ok(())
     }
 }
@@ -161,7 +165,6 @@ impl Default for SimulPlane {
                 .collect(),
             first_sect_x: Self::DEFAULT_FIRST_SECT_X,
             next_sect_x: Self::DEFAULT_FIRST_SECT_X,
-            next_sect_color_rbg: color::rand_rbg(),
         }
     }
 }
@@ -176,7 +179,6 @@ impl rand::distributions::Distribution<SimulPlane> for rand::distributions::Stan
                 .collect(),
             first_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
             next_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
-            next_sect_color_rbg: color::rand_rbg(),
         }
     }
 }

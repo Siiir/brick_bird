@@ -2,10 +2,10 @@ pub mod collide;
 
 use bevy::prelude::*;
 
-use crate::simul::{self, HeroCore, HeroHop};
+use crate::simul::{self, HeroColor, HeroCore, HeroHop};
 
-pub fn spawn(mut cmds: Commands) {
-    cmds.spawn(crate::simul::HeroBundle::default());
+pub fn spawn(mut cmds: Commands, color: Res<HeroColor>) {
+    cmds.spawn(crate::simul::HeroBundle::with_color((*color).into()));
 }
 pub fn despawn_if_present(mut cmds: Commands, hero: Query<Entity, With<crate::simul::HeroCore>>) {
     let Ok(hero) = hero.get_single() else {
@@ -38,6 +38,17 @@ pub fn up_implies_downs(
             hero_velocity.y = -2. * crate::simul::hero::INIT_VELOCITY;
         }
         hop_listener.clear();
+    }
+}
+
+pub fn update_displayed_color(
+    mut hero: Query<(&mut Sprite,), With<crate::simul::HeroCore>>,
+    logical_color: Res<HeroColor>,
+) {
+    if logical_color.is_changed() {
+        for (mut hero_sprite,) in &mut hero {
+            hero_sprite.color = (*logical_color).into();
+        }
     }
 }
 

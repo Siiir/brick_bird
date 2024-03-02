@@ -173,11 +173,11 @@ impl Sector {
         .with_children(|child_builder: &mut ChildBuilder| {
             self.upper_pole.spawn_as_upper(
                 child_builder,
-                color::contrasting_rand_rbg(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
+                color::rand_rbg_contrasting(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
             );
             self.lower_pole.spawn_as_lower(
                 child_builder,
-                color::contrasting_rand_rbg(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
+                color::rand_rbg_contrasting(color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST),
             )
         })
         .id()

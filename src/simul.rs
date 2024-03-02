@@ -16,6 +16,7 @@ pub use hero::{
     bundles::HeroBundle,
     compos::HeroCore,
     events::{death::HeroDeath, hop::HeroHop},
+    res::HeroColor,
     HeroPlugin,
 };
 
