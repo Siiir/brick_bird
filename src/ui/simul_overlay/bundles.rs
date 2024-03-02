@@ -45,8 +45,8 @@ pub mod passed_sect_count_disp {
                         TextSection {
                             value: "Passed sectors: ".to_string(),
                             style: TextStyle {
-                                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 30.0,
+                                font: asset_server.load("fonts/FiraSans-Regular.ttf"),
+                                font_size: 50.0,
                                 color: Color::WHITE,
                             },
                         },
@@ -54,7 +54,7 @@ pub mod passed_sect_count_disp {
                             value: "?".to_string(),
                             style: TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 30.0,
+                                font_size: 50.0,
                                 color: Color::GOLD,
                             },
                         },

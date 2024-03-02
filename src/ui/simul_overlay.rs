@@ -26,12 +26,12 @@ pub mod compos {
 pub mod sys {
     use bevy::prelude::*;
 
-    use crate::ui::SimulOverlayBundle;
+    use crate::ui::{PassedSectCountDispBundle, SimulOverlayBundle};
     pub fn spawn(mut commands: Commands, asset_server: Res<AssetServer>) {
         commands
             .spawn(SimulOverlayBundle::default())
             .with_children(|child_builder| {
-                child_builder.spawn(crate::ui::PassedSectCountDispBundle::new(&asset_server));
+                child_builder.spawn(PassedSectCountDispBundle::new(&asset_server));
             });
     }
 
