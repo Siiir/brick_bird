@@ -159,7 +159,7 @@ impl Sector {
             Name::from("Sector"),
             SpriteBundle {
                 sprite: Sprite {
-                    color: color_rbg.into(),
+                    color: Color::rgb_from_array(color_rbg),
                     ..default()
                 },
                 transform: Transform {

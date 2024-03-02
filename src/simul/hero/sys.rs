@@ -24,7 +24,7 @@ pub fn hop(
         // No hero, no hopping.
         return;
     };
-    for _hop in &mut hop_listener {
+    for _hop in hop_listener.read() {
         transform.translation.y += simul::hero::HOP_UP_HEIGHT;
     }
 }
@@ -44,7 +44,7 @@ pub fn up_implies_downs(
 #[deprecated]
 /// Makes hero experience a positive stimulation, whenever the players clicks space key.
 pub fn head_up_flappik(
-    kbd_input: Res<Input<KeyCode>>,
+    kbd_input: Res<ButtonInput<KeyCode>>,
     mut hero: Query<&mut Transform, With<crate::simul::HeroCore>>,
 ) {
     let Ok(mut transform) = hero.get_single_mut() else {

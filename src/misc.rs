@@ -22,8 +22,8 @@ pub mod keybinds {
         use crate::simul::HeroHop;
 
         pub fn hero_hop(
-            kbd_input: Res<Input<KeyCode>>,
-            mouse_input: Res<Input<MouseButton>>,
+            kbd_input: Res<ButtonInput<KeyCode>>,
+            mouse_input: Res<ButtonInput<MouseButton>>,
             touch_input: Res<Touches>,
             mut hop_announcer: EventWriter<HeroHop>,
         ) {

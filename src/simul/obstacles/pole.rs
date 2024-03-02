@@ -80,7 +80,7 @@ impl Pole {
             Name::from("Pole"),
             SpriteBundle {
                 sprite: Sprite {
-                    color: color.into(),
+                    color: Color::rgb_from_array(color),
                     anchor,
                     ..default()
                 },

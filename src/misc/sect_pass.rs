@@ -31,7 +31,7 @@ pub mod sys {
         mut count: ResMut<PassedSectCount>,
         mut event_reader: EventReader<PassedSectCount>,
     ) {
-        for event in &mut event_reader {
+        for event in event_reader.read() {
             *count += *event;
         }
     }

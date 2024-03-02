@@ -40,6 +40,6 @@ pub fn advance(
         passed_sect_count += 1;
     }
     if let Some(meaningful_count) = NonZeroU128::new(passed_sect_count) {
-        pass_event_writer.send(PassedSectCount::new_event(meaningful_count))
+        pass_event_writer.send(PassedSectCount::new_event(meaningful_count));
     }
 }

@@ -9,7 +9,7 @@ impl Plugin for SimulStatePlugin {
     fn build(&self, app: &mut App) {
         app
             // Resources
-            .add_state::<crate::SimulState>()
+            .init_state::<crate::SimulState>()
             // Move using graph edges.
             .add_systems(Update, (sys::circulate, sys::restart_game));
     }

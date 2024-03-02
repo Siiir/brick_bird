@@ -31,6 +31,6 @@ pub mod sys {
     use bevy::prelude::*;
 
     pub fn announce(mut announcer: EventWriter<crate::SimulStart>) {
-        announcer.send(crate::SimulStart::new())
+        announcer.send(crate::SimulStart::new());
     }
 }
