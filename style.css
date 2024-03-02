@@ -5,6 +5,24 @@ html, body {
   height: 100%; /* Ensures the body takes up full viewport height */
   width: 100%; /* Ensures the body takes up full viewport width */
 }
+#play_button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: 30vw;
+  height: 30vh;
+  font-size: 8vw; /* Adjust font size as a viewport width percentage */
+  background-color: orange; /* Example background color */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 #bird_canvas {
   display: block; /* Removes the space below the canvas */
   margin: 0;
