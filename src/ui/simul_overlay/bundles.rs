@@ -36,6 +36,7 @@ pub mod passed_sect_count_disp {
     }
 
     impl PassedSectCountDispBundle {
+        pub const FONT_SIZE: f32 = 60.0;
         pub fn new(asset_server: &Res<AssetServer>) -> Self {
             PassedSectCountDispBundle {
                 name: Name::new("PassedSectCountDisp"),
@@ -43,10 +44,10 @@ pub mod passed_sect_count_disp {
                 text: TextBundle {
                     text: Text::from_sections([
                         TextSection {
-                            value: "Passed sectors: ".to_string(),
+                            value: "PS: ".to_string(),
                             style: TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Regular.ttf"),
-                                font_size: 50.0,
+                                font_size: Self::FONT_SIZE,
                                 color: Color::WHITE,
                             },
                         },
@@ -54,7 +55,7 @@ pub mod passed_sect_count_disp {
                             value: "?".to_string(),
                             style: TextStyle {
                                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                                font_size: 50.0,
+                                font_size: Self::FONT_SIZE,
                                 color: Color::GOLD,
                             },
                         },
