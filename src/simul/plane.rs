@@ -13,7 +13,7 @@ pub struct SimulPlanePlugin {
 }
 impl Plugin for SimulPlanePlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(crate::SimulPlane::empty());
+        app.insert_resource(crate::SimulPlane::new_open());
 
         // Startup
         app.add_systems(

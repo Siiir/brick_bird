@@ -30,9 +30,7 @@ pub fn advance(
     let mut passed_sect_count = 0;
     loop {
         let current_hero_sector = plane.hero_sect();
-        let curr_hero_sect_bound = current_hero_sector
-        .right_bound_x()
-        .expect("Sector entities should have been spawned during the startup phase or just after addition of the new sector.");
+        let curr_hero_sect_bound = current_hero_sector.right_bound_x();
         if hero_transform.translation.x <= curr_hero_sect_bound {
             // Everything ok :)
             break;

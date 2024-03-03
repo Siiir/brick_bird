@@ -1,32 +1,13 @@
 //! Module encapsulating logic around `Sector` struct.
 
-use crate::color;
+use crate::{color, simul::obstacles::Pole};
 use bevy::prelude::*;
 use std::{
     backtrace::{Backtrace, BacktraceStatus},
     sync::atomic::AtomicBool,
 };
 
-pub use entity_data::EntityData;
-pub mod entity_data;
-pub mod err {
-    pub use entity_not_spawned::EntityNotSpawned;
-    pub mod entity_not_spawned {
-        use derive_more::Constructor;
-
-        #[derive(Debug, Constructor, thiserror::Error)]
-        #[error("Entity corresponding to this `{}` hasn't been spawned.", std::any::type_name::<crate::simul::Sector>())]
-        pub struct EntityNotSpawned {}
-    }
-    pub use entity_already_present::EntityAlreadySpawned;
-    pub mod entity_already_present {
-        use derive_more::Constructor;
-
-        #[derive(Debug, Constructor, thiserror::Error)]
-        #[error("Entity corresponding to this `{}` has already been spawned.", std::any::type_name::<crate::simul::Sector>())]
-        pub struct EntityAlreadySpawned {}
-    }
-}
+pub mod err;
 
 /// A division of the simulation plane.
 ///
@@ -34,7 +15,9 @@ pub mod err {
 #[derive(Default, Debug)]
 pub struct Sector {
     /// The concrete entity to which this logical object is bound to.
-    entity: Option<EntityData>,
+    entity: Option<Entity>,
+    /// The translation of the concrete entity.
+    translation_x: f32,
     /// Obstacle restricting passage through the upper part of this sector.
     upper_pole: crate::simul::obstacles::Pole,
     /// Obstacle restricting passage through the lower part of this sector.
@@ -65,6 +48,35 @@ impl Sector {
     pub const UPPER_BOUND_Y: f32 = Self::TRANSLATION_Y + Self::SCALE.y / 2.;
     pub const LOWER_BOUND_Y: f32 = Self::TRANSLATION_Y - Self::SCALE.y / 2.;
 
+    // CRUD-C: Constructors
+
+    /// Creates an empty sector with given `translation.x` .
+    pub fn empty_with_translation_x(translation_x: f32) -> Sector {
+        Self {
+            translation_x,
+            ..default()
+        }
+    }
+
+    /// Random instance constructor.
+    pub fn rand_with_translation_x<R: rand::Rng + ?Sized>(rng: &mut R, translation_x: f32) -> Self {
+        let lower_pole = Pole::new([
+            rng.gen_range(Pole::STD_SCALE_X),
+            rng.gen_range(0.0..=left_vertical_space(0.0)),
+        ]);
+        let upper_pole = Pole::new([
+            rng.gen_range(Pole::STD_SCALE_X),
+            rng.gen_range(0.0..=left_vertical_space(lower_pole.scale().y)),
+        ]);
+
+        Sector {
+            entity: None,
+            translation_x,
+            upper_pole,
+            lower_pole,
+        }
+    }
+
     // CRUD-R: Getters
 
     pub fn upper_pole(&self) -> &crate::simul::obstacles::Pole {
@@ -75,12 +87,16 @@ impl Sector {
         &self.lower_pole
     }
 
-    fn entity(&self) -> Result<&EntityData, err::EntityNotSpawned> {
+    pub fn entity(&self) -> Result<&Entity, err::EntityNotSpawned> {
         self.entity.as_ref().ok_or(err::EntityNotSpawned::new())
     }
+    #[allow(dead_code)]
+    fn entity_mut(&mut self) -> Result<&mut Entity, err::EntityNotSpawned> {
+        self.entity.as_mut().ok_or(err::EntityNotSpawned::new())
+    }
 
-    pub fn translation_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        self.entity().map(EntityData::translation_x)
+    pub fn translation_x(&self) -> f32 {
+        self.translation_x
     }
 
     // CRUD-R: Properties
@@ -89,30 +105,33 @@ impl Sector {
 
     /// Returns true <==> this logical sector is bound to concrete entity.
     pub fn entity_present(&self) -> bool {
-        self.entity.is_some()
+        self.entity().is_ok()
     }
 
-    pub fn right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        self.entity().map(|entity_data| entity_data.right_bound_x())
+    pub fn right_bound_x(&self) -> f32 {
+        self.translation_x() + 0.5 * crate::simul::Sector::SCALE.x
     }
 
+    // Upper pole bounds
+    pub fn upper_pole_left_bound_x(&self) -> f32 {
+        self.upper_pole().left_bound_x(self.translation_x)
+    }
+    pub fn upper_pole_right_bound_x(&self) -> f32 {
+        self.upper_pole().right_bound_x(self.translation_x)
+    }
     pub fn upper_pole_lower_bound_y(&self) -> f32 {
         self.upper_pole().lower_bound_y(Self::UPPER_BOUND_Y)
     }
+
+    // Lower pole bounds
+    pub fn lower_pole_left_bound_x(&self) -> f32 {
+        self.lower_pole().left_bound_x(self.translation_x)
+    }
+    pub fn lower_pole_right_bound_x(&self) -> f32 {
+        self.lower_pole().right_bound_x(self.translation_x)
+    }
     pub fn lower_pole_upper_bound_y(&self) -> f32 {
         self.lower_pole().upper_bound_y(Self::LOWER_BOUND_Y)
-    }
-    pub fn upper_pole_left_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        Ok(self.upper_pole().left_bound_x(self.translation_x()?))
-    }
-    pub fn lower_pole_left_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        Ok(self.lower_pole().left_bound_x(self.translation_x()?))
-    }
-    pub fn upper_pole_right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        Ok(self.upper_pole().right_bound_x(self.translation_x()?))
-    }
-    pub fn lower_pole_right_bound_x(&self) -> Result<f32, err::EntityNotSpawned> {
-        Ok(self.lower_pole().right_bound_x(self.translation_x()?))
     }
 
     // CRUD-U: Updaters
@@ -122,25 +141,33 @@ impl Sector {
     /// Binds `self` to spawned entity.
     pub fn spawn(
         &mut self,
-        translation_x: f32,
         color_rbg: [f32; 3],
         cmds: &mut Commands,
     ) -> Result<(), err::EntityAlreadySpawned> {
         if self.entity_present() {
             Err(err::EntityAlreadySpawned::new())
         } else {
-            let _ = self.entity.insert(EntityData::new(
-                self.spawn_sector_entity(cmds, translation_x, color_rbg),
-                translation_x,
-            ));
+            let _ =
+                self.entity
+                    .insert(self.spawn_sector_entity(cmds, self.translation_x(), color_rbg));
             Ok(())
         }
+    }
+
+    pub fn spawn_with_rand_color(
+        &mut self,
+        hero_color_rbg: [f32; 3],
+        cmds: &mut Commands,
+    ) -> Result<(), crate::simul::plane::sector::err::EntityAlreadySpawned> {
+        let next_sect_color_rbg =
+            color::rand_rbg_contrasting(hero_color_rbg, crate::SimulPlane::MIN_SECT_COLOR_CONTRAST);
+        self.spawn(next_sect_color_rbg.into(), cmds)
     }
 
     /// Despawns the concrete entity `self` is bounded to. Unbinds `self`.
     pub fn despawn(&mut self, cmds: &mut Commands) -> Result<(), err::EntityNotSpawned> {
         if let Some(entity) = self.entity.take() {
-            cmds.entity(entity.id()).despawn_recursive();
+            cmds.entity(entity).despawn_recursive();
             Ok(())
         } else {
             Err(err::EntityNotSpawned::new())
@@ -181,29 +208,6 @@ impl Sector {
             )
         })
         .id()
-    }
-}
-
-// CRUD-C: Constructors
-
-/// Standard distribution of sectors.
-impl rand::distributions::Distribution<Sector> for rand::distributions::Standard {
-    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Sector {
-        use crate::simul::obstacles::Pole;
-
-        let lower_pole = Pole::new([
-            rng.gen_range(Pole::STD_SCALE_X),
-            rng.gen_range(0.0..=left_vertical_space(0.0)),
-        ]);
-        let upper_pole = Pole::new([
-            rng.gen_range(Pole::STD_SCALE_X),
-            rng.gen_range(0.0..=left_vertical_space(lower_pole.scale().y)),
-        ]);
-        Sector {
-            entity: None,
-            upper_pole,
-            lower_pole,
-        }
     }
 }
 

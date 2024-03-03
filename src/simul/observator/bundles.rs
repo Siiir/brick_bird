@@ -8,8 +8,8 @@ pub struct ObservatorBundle {
     base: Camera2dBundle,
 }
 impl ObservatorBundle {
-    pub fn scale_from_height(height: f32) -> f32 {
-        910. / height
+    pub fn scale_from_win_size(size: Vec2) -> f32 {
+        910. / size.min_element()
     }
 }
 impl Default for ObservatorBundle {

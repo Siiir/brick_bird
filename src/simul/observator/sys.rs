@@ -36,13 +36,11 @@ pub fn react_to_window_resize(
     mut cameras: Query<(&mut Transform,), (With<Camera>,)>,
 ) {
     if let Some(last_win_size) = resize_events.read().last() {
-        debug!(
-            "Last window resize: width = {}, height = {}",
-            last_win_size.width, last_win_size.height
-        );
+        let win_size: Vec2 = [last_win_size.width, last_win_size.height].into();
+        debug!("Last window resize: {win_size}");
         let (mut camera_transform,) = cameras.single_mut();
 
-        let new_scale = ObservatorBundle::scale_from_height(last_win_size.height);
+        let new_scale = ObservatorBundle::scale_from_win_size(win_size);
         camera_transform.scale.x = new_scale;
         camera_transform.scale.y = new_scale;
     }

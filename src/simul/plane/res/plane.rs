@@ -1,6 +1,8 @@
 //! Module encapsulating `SimulPlane` struct logic.
 
-use crate::color;
+use std::{collections::VecDeque, iter};
+
+use crate::simul::Sector;
 use bevy::prelude::*;
 use derive_more::IntoIterator;
 
@@ -12,13 +14,9 @@ use derive_more::IntoIterator;
 #[derive(Resource, Debug, IntoIterator)]
 pub struct SimulPlane {
     /// # Invariants:
-    /// * Should have length > [`Self::HERO_SECT_IDX`] .
+    /// * Should have length = [`Self::SECT_COUNT`] .
     #[into_iterator(owned, ref_mut, ref)]
-    x_axis: std::collections::VecDeque<crate::simul::Sector>,
-    /// The x coordinate of the first sector in `self`.
-    first_sect_x: f32,
-    /// The x coordinate of the next sector in `self` to be spawned.
-    next_sect_x: f32,
+    x_axis: std::collections::VecDeque<Sector>,
 }
 
 impl SimulPlane {
@@ -35,35 +33,67 @@ impl SimulPlane {
     /// As determined be the `game::color::rbg_contrast` function.
     pub const MIN_SECT_COLOR_CONTRAST: f32 = 0.9;
 
+    pub const CONTAINING_AT_LEAST_1_SECT_EXPECTATION: &'static str =
+        "Simulation plane should contain at least 1 sector.";
+
     // Constants – Calculated
     pub const INITIALLY_EMPTY_SECTS_COUNT: usize =
         Self::HERO_SECT_IDX + 1 + Self::COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO;
     pub const INITIALLY_FILLED_SECTS_COUNT: usize =
         Self::SECT_COUNT - Self::INITIALLY_EMPTY_SECTS_COUNT;
-    const NEXT_SECT_OFFSET: f32 = crate::simul::Sector::SCALE.x;
+    const NEXT_SECT_OFFSET: f32 = Sector::SCALE.x;
 
     // Assertions
 
-    /// Makes sure that the default sector count is compatible with index.
-    ///
-    /// Meaning: it **won't render** hero index **out of bounds**.
-    const _HERO_IDX_AND_SEC_COUNT: () =
-        assert!(Self::INITIALLY_EMPTY_SECTS_COUNT < Self::SECT_COUNT);
+    const _CONTAINS_AT_LEAST_1_SECTOR: () = assert!(
+        0 < Self::SECT_COUNT,
+        "{}",
+        Self::CONTAINING_AT_LEAST_1_SECT_EXPECTATION
+    );
 
     // CRUD-C: Constructors
 
     /// Creates an open, unobstructed simulation plane, which is really borring.
-    pub fn empty() -> Self {
-        Self {
-            x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
-                .take(Self::SECT_COUNT)
+    pub fn new_open() -> Self {
+        let mut next_sect_x = SimulPlane::DEFAULT_FIRST_SECT_X;
+        SimulPlane {
+            x_axis: iter::from_fn(|| Some(next_empty_sector(&mut next_sect_x)))
+                .take(SimulPlane::SECT_COUNT)
                 .collect(),
-            first_sect_x: Self::DEFAULT_FIRST_SECT_X,
-            next_sect_x: Self::DEFAULT_FIRST_SECT_X,
         }
     }
 
-    // CRUD-C: Initializers
+    // CRUD-R: Getters
+
+    pub fn first_sect(&self) -> &Sector {
+        self.x_axis
+            .front()
+            .expect(Self::CONTAINING_AT_LEAST_1_SECT_EXPECTATION)
+    }
+    /// Gets the plane sector on which the hero resides.
+    pub fn hero_sect(&self) -> &Sector {
+        &self.x_axis[Self::HERO_SECT_IDX]
+    }
+    pub fn last_sect(&self) -> &Sector {
+        self.x_axis
+            .back()
+            .expect(Self::CONTAINING_AT_LEAST_1_SECT_EXPECTATION)
+    }
+
+    // CRUD-R: Properties
+
+    /// Returns the x coordinate of the first sector in `self`.
+    pub fn first_sect_x(&self) -> f32 {
+        self.first_sect().translation_x()
+    }
+    pub fn last_sect_x(&self) -> f32 {
+        self.last_sect().translation_x()
+    }
+    pub fn next_sect_x(&self) -> f32 {
+        self.last_sect_x() + Self::NEXT_SECT_OFFSET
+    }
+
+    // CRUD-U: Initializers
 
     /// **Spawns the entities** representing already initialized sector objects.
     ///
@@ -72,26 +102,15 @@ impl SimulPlane {
     /// # Expectations
     /// This is expected to be called at the start of the simulation to create entities corresponding to the logical plane sectors.
     pub fn spawn_sects(
-        mut this: ResMut<SimulPlane>,
+        mut plane: ResMut<SimulPlane>,
         hero_color: Res<crate::simul::HeroColor>,
         mut cmds: Commands,
     ) {
-        let SimulPlane {
-            x_axis,
-            first_sect_x: _,
-            next_sect_x,
-        } = &mut *this;
-        trace!("Spawned sects.");
-        for sector in x_axis {
-            Self::spawn_next_sect(hero_color.rbg(), sector, next_sect_x, &mut cmds).unwrap()
+        for sector in &mut plane.x_axis {
+            sector
+                .spawn_with_rand_color(hero_color.rbg(), &mut cmds)
+                .unwrap()
         }
-    }
-
-    // CRUD-R: Getters
-
-    /// Gets the plane sector on which the hero resides.
-    pub fn hero_sect(&self) -> &crate::simul::Sector {
-        &self.x_axis[Self::HERO_SECT_IDX]
     }
 
     // CRUD-U: Updaters
@@ -115,70 +134,61 @@ impl SimulPlane {
         cmds: &mut Commands,
     ) {
         // Add back
-        let mut new_sect: crate::simul::Sector = rng.gen();
-        Self::spawn_next_sect(
-            hero_color_rbg,
-            &mut new_sect,
-            &mut self.next_sect_x,
+        let mut new_sect = Sector::rand_with_translation_x(rng, self.next_sect_x());
+        new_sect.spawn_with_rand_color(           hero_color_rbg,
             cmds,
         ).expect("This new sector should not have a corresponding entity yet, because it has just been generated.");
         self.x_axis.push_back(new_sect);
-        // Move logical front
-        self.first_sect_x += Self::NEXT_SECT_OFFSET;
         // Remove displayed front
         self.x_axis.pop_front().expect("Expected `self.x_axis` to be non-empty, because a value has been just added to it.").despawn(cmds).unwrap();
-    }
-    /// Creates and spawns the next sector that comes after the last one.
-    ///
-    /// Spawns new sector on the right of the simulation plane.
-    fn spawn_next_sect(
-        hero_color_rbg: [f32; 3],
-        next_sect: &mut crate::simul::Sector,
-        next_sect_x: &mut f32,
-        cmds: &mut Commands,
-    ) -> Result<(), crate::simul::plane::sector::err::EntityAlreadySpawned> {
-        let next_sect_color_rbg =
-            color::rand_rbg_contrasting(hero_color_rbg, SimulPlane::MIN_SECT_COLOR_CONTRAST);
-        next_sect.spawn(*next_sect_x, next_sect_color_rbg.into(), cmds)?;
-        *next_sect_x += Self::NEXT_SECT_OFFSET;
-        Ok(())
     }
 }
 
 // CRUD-C: Constructors
 
-// Trait based constructors
-
 /// Serves as a good peaceful space for the player to start in before they start to encounter obstacles.
 impl Default for SimulPlane {
     fn default() -> Self {
-        use rand::Rng;
-
-        Self {
-            x_axis: std::iter::from_fn(|| Some(crate::simul::Sector::default()))
+        let mut next_sect_x = SimulPlane::DEFAULT_FIRST_SECT_X;
+        let mut x_axis: VecDeque<Sector> =
+            iter::from_fn(|| Some(next_empty_sector(&mut next_sect_x)))
                 .take(Self::INITIALLY_EMPTY_SECTS_COUNT)
-                .chain(
-                    rand::thread_rng()
-                        .sample_iter(rand::distributions::Standard)
-                        .take(Self::INITIALLY_FILLED_SECTS_COUNT),
-                )
-                .collect(),
-            first_sect_x: Self::DEFAULT_FIRST_SECT_X,
-            next_sect_x: Self::DEFAULT_FIRST_SECT_X,
-        }
+                .collect();
+        x_axis.extend(
+            iter::from_fn(|| Some(next_rand_sector(&mut rand::thread_rng(), &mut next_sect_x)))
+                .take(Self::INITIALLY_FILLED_SECTS_COUNT),
+        );
+
+        Self { x_axis }
     }
 }
 
 impl rand::distributions::Distribution<SimulPlane> for rand::distributions::Standard {
-    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> SimulPlane {
-        use rand::distributions;
-
+    fn sample<R>(&self, rng: &mut R) -> SimulPlane
+    where
+        R: rand::Rng + ?Sized,
+    {
+        let mut next_sect_x = SimulPlane::DEFAULT_FIRST_SECT_X;
         SimulPlane {
-            x_axis: std::iter::from_fn(|| Some(distributions::Standard.sample(rng)))
+            x_axis: iter::from_fn(|| Some(next_rand_sector(rng, &mut next_sect_x)))
                 .take(SimulPlane::SECT_COUNT)
                 .collect(),
-            first_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
-            next_sect_x: SimulPlane::DEFAULT_FIRST_SECT_X,
         }
     }
+}
+
+// CRUD-C: Fabrication functions
+
+fn next_empty_sector(next_sect_x: &mut f32) -> Sector {
+    let next_empty_sector = Sector::empty_with_translation_x(*next_sect_x);
+    *next_sect_x += SimulPlane::NEXT_SECT_OFFSET;
+    next_empty_sector
+}
+fn next_rand_sector<R>(rng: &mut R, next_sect_x: &mut f32) -> Sector
+where
+    R: rand::Rng + ?Sized,
+{
+    let next_empty_sector = Sector::rand_with_translation_x(rng, *next_sect_x);
+    *next_sect_x += SimulPlane::NEXT_SECT_OFFSET;
+    next_empty_sector
 }
