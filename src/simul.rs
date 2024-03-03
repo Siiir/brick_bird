@@ -16,7 +16,7 @@ pub use hero::{
     bundles::HeroBundle,
     compos::HeroCore,
     events::{death::HeroDeath, hop::HeroHop},
-    res::HeroColor,
+    res::color::HeroColor,
     HeroPlugin,
 };
 
@@ -27,7 +27,10 @@ pub mod plane;
 pub use plane::sector::Sector;
 
 pub mod motion;
-pub use motion::{compos::Velocity, MotionPlugin};
+pub use motion::{
+    compos::{acceleration::Acceleration, velocity::Velocity},
+    MotionPlugin,
+};
 
 #[deprecated]
 #[allow(unused)]

@@ -8,7 +8,7 @@ pub struct KeybindsPlugin {
 }
 impl Plugin for KeybindsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, sys::hero_hop.run_if(in_state(SimulState::Running)));
+        app.add_systems(Update, sys::hero_hop.run_if(SimulState::is_running_cond()));
     }
 }
 

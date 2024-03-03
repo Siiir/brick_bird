@@ -8,7 +8,7 @@ pub struct HeroBundle {
     name: Name,
     core: crate::simul::HeroCore,
     base: SpriteBundle,
-    motion: crate::simul::Velocity,
+    velocity: crate::simul::Velocity,
 }
 impl HeroBundle {
     pub const DISPLAY_LAYER: f32 = 10.0;
@@ -32,7 +32,7 @@ impl HeroBundle {
                 },
                 ..default()
             },
-            [hero::INIT_VELOCITY, 0.].into(),
+            [hero::INIT_VELOCITY.x, 0.].into(),
         )
     }
 }

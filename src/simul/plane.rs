@@ -28,7 +28,7 @@ impl Plugin for SimulPlanePlugin {
         // Update
         app.add_systems(
             Update,
-            (sys::advance,).run_if(in_state(crate::SimulState::Running)),
+            (sys::advance,).run_if(crate::SimulState::is_running_cond()),
         );
     }
 }

@@ -1,6 +1,9 @@
 //! Module encapsulating logic around `Sector` struct.
 
-use crate::{color, simul::obstacles::Pole};
+use crate::{
+    color,
+    simul::obstacles::{self, Pole},
+};
 use bevy::prelude::*;
 use std::{
     backtrace::{Backtrace, BacktraceStatus},
@@ -19,9 +22,9 @@ pub struct Sector {
     /// The translation of the concrete entity.
     translation_x: f32,
     /// Obstacle restricting passage through the upper part of this sector.
-    upper_pole: crate::simul::obstacles::Pole,
+    upper_pole: obstacles::Pole,
     /// Obstacle restricting passage through the lower part of this sector.
-    lower_pole: crate::simul::obstacles::Pole,
+    lower_pole: obstacles::Pole,
 }
 impl Sector {
     // Constants – Given
@@ -79,11 +82,11 @@ impl Sector {
 
     // CRUD-R: Getters
 
-    pub fn upper_pole(&self) -> &crate::simul::obstacles::Pole {
+    pub fn upper_pole(&self) -> &obstacles::Pole {
         &self.upper_pole
     }
 
-    pub fn lower_pole(&self) -> &crate::simul::obstacles::Pole {
+    pub fn lower_pole(&self) -> &obstacles::Pole {
         &self.lower_pole
     }
 

@@ -2,7 +2,10 @@ pub mod collide;
 
 use bevy::prelude::*;
 
-use crate::simul::{self, HeroColor, HeroCore, HeroHop};
+use crate::{
+    simul::{self, hero, HeroColor, HeroCore, HeroHop, Velocity},
+    SimulState,
+};
 
 pub fn spawn(mut cmds: Commands, color: Res<HeroColor>) {
     cmds.spawn(crate::simul::HeroBundle::with_color((*color).into()));
@@ -19,7 +22,12 @@ pub fn despawn_if_present(mut cmds: Commands, hero: Query<Entity, With<crate::si
 pub fn hop(
     mut hero: Query<&mut Transform, With<crate::simul::HeroCore>>,
     mut hop_listener: EventReader<HeroHop>,
+    simul_state: Res<State<SimulState>>,
 ) {
+    if !simul_state.is_running() {
+        return;
+    }
+
     let Ok(mut transform) = hero.get_single_mut() else {
         // No hero, no hopping.
         return;
@@ -30,12 +38,16 @@ pub fn hop(
 }
 
 pub fn up_implies_downs(
-    mut hero_velocity: Query<(&mut crate::simul::Velocity,), With<HeroCore>>,
+    mut hero: Query<(&mut Velocity,), With<HeroCore>>,
     mut hop_listener: EventReader<HeroHop>,
+    simul_state: Res<State<SimulState>>,
 ) {
+    if !simul_state.is_running_without_gravity() {
+        return;
+    }
     if !hop_listener.is_empty() {
-        if let Ok((mut hero_velocity,)) = hero_velocity.get_single_mut() {
-            hero_velocity.y = -2. * crate::simul::hero::INIT_VELOCITY;
+        if let Ok((mut hero_velocity,)) = hero.get_single_mut() {
+            hero_velocity.y = hero::INIT_VELOCITY.y;
         }
         hop_listener.clear();
     }
@@ -64,6 +76,6 @@ pub fn head_up_flappik(
     };
     if kbd_input.just_pressed(KeyCode::Space) {
         // Adjust this angle to control the rotation amount
-        transform.rotate(Quat::from_rotation_z(crate::simul::hero::HEAD_UP_ANGLE));
+        transform.rotate(Quat::from_rotation_z(hero::HEAD_UP_ANGLE));
     }
 }

@@ -56,7 +56,7 @@ use crate::SimulState;
 /// Initial hero velocity.
 ///
 /// The velocity value with witch the hero entity will start
-pub const INIT_VELOCITY: f32 = 100.;
+pub const INIT_VELOCITY: Vec2 = Vec2::new(100., -200.);
 pub const HOP_UP_HEIGHT: f32 = 60.;
 pub const HEAD_UP_ANGLE: f32 = 0.3;
 
@@ -82,10 +82,7 @@ impl Plugin for HeroPlugin {
             // despawn sytems
             .add_systems(OnEnter(SimulState::Cleanup), sys::despawn_if_present)
             // movement systems
-            .add_systems(
-                Update,
-                (sys::hop, sys::up_implies_downs).run_if(in_state(SimulState::Running)),
-            )
+            .add_systems(Update, (sys::hop, sys::up_implies_downs))
             // collision systems
             .add_systems(
                 Update,
@@ -95,7 +92,7 @@ impl Plugin for HeroPlugin {
                     collide::with_lower_pole,
                     collide::with_upper_pole,
                 )
-                    .run_if(in_state(SimulState::Running)),
+                    .run_if(SimulState::is_running_cond()),
             )
             // Misc.
             .add_systems(Update, (sys::update_displayed_color,));
