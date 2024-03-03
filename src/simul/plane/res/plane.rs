@@ -25,7 +25,7 @@ impl SimulPlane {
     // Constants – Given
 
     pub const HERO_SECT_IDX: usize = 3;
-    const COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO: usize = 2;
+    const COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO: usize = 1;
     /// The default count of sectors in the plane.
     pub const SECT_COUNT: usize = 9;
     /// The x cordinate on which the first sector will be rendered.

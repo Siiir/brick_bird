@@ -9,7 +9,7 @@ pub mod start;
 pub mod state;
 
 pub mod observator;
-pub use observator::{bundles::CameraBundle, ObservationPlugin};
+pub use observator::{bundles::ObservatorBundle, ObservationPlugin};
 
 pub mod hero;
 pub use hero::{
