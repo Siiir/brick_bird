@@ -41,7 +41,7 @@ pub mod states {
                 _ => false,
             }
         }
-        pub fn is_running_cond() -> impl ReadOnlySystem<In = (), Out = bool> {
+        pub fn is_running_cond() -> impl Condition<()> {
             in_state(Self::RunningWithoutGravity).or_else(in_state(Self::RunningWithGravity))
         }
 
