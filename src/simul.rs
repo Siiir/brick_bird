@@ -1,11 +1,5 @@
 //! Module containing plugins related to the in-game simulation.
 
-#[deprecated]
-pub mod finish;
-
-#[deprecated]
-pub mod start;
-
 pub mod state;
 
 pub mod observator;
@@ -28,13 +22,18 @@ pub use plane::sector::Sector;
 
 pub mod motion;
 pub use motion::{
-    compos::{acceleration::Acceleration, velocity::Velocity},
+    compos::{acceleration::Acceleration, gravitation::Gravitation, velocity::Velocity},
+    res::{gravity::Gravity, scale::MotionScale},
     MotionPlugin,
 };
 
 #[deprecated]
 #[allow(unused)]
 pub mod emotions;
+#[deprecated]
+pub mod finish;
+#[deprecated]
+pub mod start;
 #[allow(deprecated)]
 pub use emotions::EmotionsPlugin;
 

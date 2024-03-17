@@ -3,7 +3,7 @@ pub mod collide;
 use bevy::prelude::*;
 
 use crate::{
-    simul::{self, hero, HeroColor, HeroCore, HeroHop, Velocity},
+    simul::{hero, Gravitation, HeroColor, HeroCore, HeroHop, Velocity},
     SimulState,
 };
 
@@ -20,36 +20,42 @@ pub fn despawn_if_present(mut cmds: Commands, hero: Query<Entity, With<crate::si
 
 /// Makes hero experience a positive stimulation, whenever the players clicks space key.
 pub fn hop(
-    mut hero: Query<&mut Transform, With<crate::simul::HeroCore>>,
+    mut hero: Query<(&mut Velocity, &mut Transform), With<crate::simul::HeroCore>>,
     mut hop_listener: EventReader<HeroHop>,
     simul_state: Res<State<SimulState>>,
 ) {
     if !simul_state.is_running() {
         return;
     }
-
-    let Ok(mut transform) = hero.get_single_mut() else {
+    let Ok((mut velocity, mut transform)) = hero.get_single_mut() else {
         // No hero, no hopping.
         return;
     };
-    for _hop in hop_listener.read() {
-        transform.translation.y += simul::hero::HOP_UP_HEIGHT;
+
+    for hop in hop_listener.read() {
+        velocity.y += hop.strength;
+        transform.translation.y += hop.up_tp_offset;
     }
 }
 
 pub fn up_implies_downs(
-    mut hero: Query<(&mut Velocity,), With<HeroCore>>,
     mut hop_listener: EventReader<HeroHop>,
+    mut next_simul_state: ResMut<NextState<SimulState>>,
     simul_state: Res<State<SimulState>>,
 ) {
     if !simul_state.is_running_without_gravity() {
         return;
     }
     if !hop_listener.is_empty() {
-        if let Ok((mut hero_velocity,)) = hero.get_single_mut() {
-            hero_velocity.y = hero::INIT_VELOCITY.y;
-        }
+        next_simul_state
+            .0
+            .get_or_insert(SimulState::RunningWithGravity);
         hop_listener.clear();
+    }
+}
+pub fn gravity_causes_downs_uncond(mut cmds: Commands, hero: Query<(Entity,), With<HeroCore>>) {
+    if let Ok((hero,)) = hero.get_single() {
+        cmds.entity(hero).insert(Gravitation::default());
     }
 }
 

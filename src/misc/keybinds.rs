@@ -31,7 +31,7 @@ pub mod sys {
         .into_iter()
         {
             if press {
-                hop_announcer.send(HeroHop::new());
+                hop_announcer.send(HeroHop::default());
             }
         }
     }

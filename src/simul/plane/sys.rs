@@ -1,6 +1,6 @@
 //! Systems that make the plane objects usefull and impactful.
 
-use bevy::prelude::*;
+use bevy::{app::AppExit, prelude::*, window::WindowCloseRequested};
 use std::num::NonZeroU128;
 
 use crate::{misc::PassedSectCount, SimulPlane};
@@ -41,4 +41,18 @@ pub fn advance(
     if let Some(meaningful_count) = NonZeroU128::new(passed_sect_count) {
         pass_event_writer.send(PassedSectCount::new_event(meaningful_count));
     }
+}
+
+pub fn run_special_drop_of_sects(
+    cmds: Commands,
+    mut app_exits: EventReader<AppExit>,
+    mut win_close_reqs: EventReader<WindowCloseRequested>,
+    simul_plane: ResMut<SimulPlane>,
+) {
+    if app_exits.is_empty() && win_close_reqs.is_empty() {
+        return;
+    }
+    SimulPlane::despawn_sects(simul_plane, cmds);
+    app_exits.clear();
+    win_close_reqs.clear();
 }

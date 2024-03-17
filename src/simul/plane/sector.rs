@@ -12,6 +12,8 @@ use std::{
 
 pub mod err;
 
+pub static DROP_ERR_HAS_BEEN_DISPLAYED: AtomicBool = AtomicBool::new(false);
+
 /// A division of the simulation plane.
 ///
 /// Can & is meant to be bound to a concrete entity that represents it. Contains cool properties which are used for the sector based calculations like: location detection, collision detection.
@@ -228,10 +230,8 @@ pub fn left_vertical_space(taken_space: f32) -> f32 {
 impl Drop for Sector {
     fn drop(&mut self) {
         if self.entity_present() {
-            static ERR_HAS_BEEN_DISPLAYED: AtomicBool = AtomicBool::new(false);
-
             // If the error hasn't been started being displayed before entering this `if`.
-            if !ERR_HAS_BEEN_DISPLAYED.swap(true, std::sync::atomic::Ordering::SeqCst) {
+            if !DROP_ERR_HAS_BEEN_DISPLAYED.swap(true, std::sync::atomic::Ordering::SeqCst) {
                 // Prepare for displaying the error.
                 let backtrace = Backtrace::capture();
                 let backtrace_info = match backtrace.status() {

@@ -18,8 +18,11 @@ impl PluginGroup for UiPlugins {
 }
 
 pub use simul_overlay::{
-    bundles::{node::SimulOverlayBundle, passed_sect_count_disp::PassedSectCountDispBundle},
-    compos::passed_sect_count::PassedSectCountDisp,
+    bundles::{
+        motion_scale_disp::MotionScaleDispBundle, node::SimulOverlayBundle,
+        passed_sect_count_disp::PassedSectCountDispBundle,
+    },
+    compos::{motion_scale::MotionScaleDisp, passed_sect_count::PassedSectCountDisp},
     SimulOverlayPlugin,
 };
 pub mod simul_overlay;

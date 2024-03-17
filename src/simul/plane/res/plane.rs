@@ -1,8 +1,8 @@
 //! Module encapsulating `SimulPlane` struct logic.
 
-use std::{collections::VecDeque, iter};
+use std::{collections::VecDeque, iter, sync::atomic};
 
-use crate::simul::Sector;
+use crate::simul::{plane::sector, Sector};
 use bevy::prelude::*;
 use derive_more::IntoIterator;
 
@@ -15,7 +15,7 @@ use derive_more::IntoIterator;
 pub struct SimulPlane {
     /// # Invariants:
     /// * Should have length = [`Self::SECT_COUNT`] .
-    #[into_iterator(owned, ref_mut, ref)]
+    #[into_iterator(ref_mut, ref)]
     x_axis: std::collections::VecDeque<Sector>,
 }
 
@@ -191,4 +191,14 @@ where
     let next_empty_sector = Sector::rand_with_translation_x(rng, *next_sect_x);
     *next_sect_x += SimulPlane::NEXT_SECT_OFFSET;
     next_empty_sector
+}
+
+// CRUD-D: Destructor
+
+impl Drop for SimulPlane {
+    fn drop(&mut self) {
+        if std::thread::panicking() {
+            sector::DROP_ERR_HAS_BEEN_DISPLAYED.store(true, atomic::Ordering::SeqCst)
+        }
+    }
 }

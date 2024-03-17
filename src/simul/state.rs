@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::SimulState;
+
 #[derive(Debug, Default)]
 pub struct SimulStatePlugin {
     _priv_fields_placeholder: (),
@@ -10,74 +12,35 @@ impl Plugin for SimulStatePlugin {
         app
             // Resources
             .init_state::<crate::SimulState>()
+            .init_resource::<crate::SimulStartTime>()
+            // Reset simulation start time.
+            .add_systems(
+                OnEnter(SimulState::RunningWithoutGravity),
+                sys::reset_simul_start_time_uncond,
+            )
             // Move using graph edges.
             .add_systems(Update, (sys::circulate, sys::restart_game));
     }
 }
 
-pub mod states {
+pub mod states;
+
+pub mod res {
+    use std::time;
+
     use bevy::prelude::*;
-    use num_enum::{FromPrimitive, IntoPrimitive};
+    use derive_more::{From, Into};
 
-    #[derive(
-        Debug, Clone, Copy, Default, States, Eq, PartialEq, Hash, IntoPrimitive, FromPrimitive,
-    )]
-    #[repr(u8)]
-    pub enum SimulState {
-        #[default]
-        Startup,
-        StartupEnd,
-        RunningWithoutGravity,
-        RunningWithGravity,
-        Cleanup,
-    }
-
-    impl SimulState {
-        // CRUD-R: Superproperties
-
-        pub fn is_running(self) -> bool {
-            match self {
-                Self::RunningWithoutGravity | Self::RunningWithGravity => true,
-                _ => false,
-            }
-        }
-        pub fn is_running_cond() -> impl Condition<()> {
-            in_state(Self::RunningWithoutGravity).or_else(in_state(Self::RunningWithGravity))
-        }
-
-        // CRUD-R: Base properties
-
-        pub fn is_startup(self) -> bool {
-            self == Self::Startup
-        }
-        pub fn is_startup_end(self) -> bool {
-            self == Self::StartupEnd
-        }
-        pub fn is_running_without_gravity(self) -> bool {
-            self == Self::RunningWithoutGravity
-        }
-        pub fn is_running_with_gravity(self) -> bool {
-            self == Self::RunningWithGravity
-        }
-        pub fn is_cleanup(self) -> bool {
-            self == Self::Cleanup
-        }
-
-        // CRUD-U: Transitions
-
-        pub fn forward(self) -> Self {
-            (u8::from(self).wrapping_add(1)).into()
-        }
-        pub fn backward(self) -> Self {
-            (u8::from(self).wrapping_sub(1)).into()
-        }
-    }
+    #[derive(Resource, Default, Clone, Copy, From, PartialEq, Eq, PartialOrd, Ord, Hash, Into)]
+    pub struct SimulStartTime(time::Duration);
 }
 
 pub mod sys {
     use bevy::prelude::*;
 
     use crate::{simul::HeroDeath, SimulState};
+
+    use crate::SimulStartTime;
 
     pub fn restart_game(
         mut restart_cause: EventReader<HeroDeath>,
@@ -93,5 +56,9 @@ pub mod sys {
         if !state.is_running() {
             let _ = *next_state.0.insert(state.forward());
         }
+    }
+
+    pub fn reset_simul_start_time_uncond(mut start_time: ResMut<SimulStartTime>, time: Res<Time>) {
+        *start_time = time.elapsed().into();
     }
 }

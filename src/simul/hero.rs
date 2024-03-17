@@ -25,14 +25,17 @@ pub mod events {
     }
     pub mod hop {
         use bevy::prelude::*;
+        use derive_more::Constructor;
 
-        #[derive(Event, Debug)]
+        #[derive(Event, Constructor, Debug)]
         pub struct HeroHop {
-            _hight: (),
+            pub strength: f32,
+            /// Up teleport offset – the y offset used for calculating position after hop-induced teleportation.
+            pub up_tp_offset: f32,
         }
-        impl HeroHop {
-            pub fn new() -> Self {
-                Self { _hight: () }
+        impl Default for HeroHop {
+            fn default() -> Self {
+                Self::new(150., 15.)
             }
         }
     }
@@ -83,6 +86,10 @@ impl Plugin for HeroPlugin {
             .add_systems(OnEnter(SimulState::Cleanup), sys::despawn_if_present)
             // movement systems
             .add_systems(Update, (sys::hop, sys::up_implies_downs))
+            .add_systems(
+                OnEnter(SimulState::RunningWithGravity),
+                (sys::gravity_causes_downs_uncond,),
+            )
             // collision systems
             .add_systems(
                 Update,

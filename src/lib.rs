@@ -7,7 +7,7 @@ pub use simul::{
     finish::{events::SimulFinish, SimulFinishPlugin},
     plane::{res::plane::SimulPlane, SimulPlanePlugin},
     start::{events::SimulStart, SimulStartPlugin},
-    state::{states::SimulState, SimulStatePlugin},
+    state::{res::SimulStartTime, states::SimulState, SimulStatePlugin},
     SimulPlugins,
 };
 pub mod simul;
