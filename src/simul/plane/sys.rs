@@ -52,7 +52,7 @@ pub fn run_special_drop_of_sects(
     if app_exits.is_empty() && win_close_reqs.is_empty() {
         return;
     }
-    SimulPlane::despawn_sects(simul_plane, cmds);
+    SimulPlane::despawn(simul_plane, cmds);
     app_exits.clear();
     win_close_reqs.clear();
 }

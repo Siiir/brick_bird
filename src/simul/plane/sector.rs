@@ -17,9 +17,15 @@ pub static DROP_ERR_HAS_BEEN_DISPLAYED: AtomicBool = AtomicBool::new(false);
 /// A division of the simulation plane.
 ///
 /// Can & is meant to be bound to a concrete entity that represents it. Contains cool properties which are used for the sector based calculations like: location detection, collision detection.
+///
+/// # States
+/// * Spawned – contains handle to corresponding, spawned `bevy::prelude::Entity`
+/// * NotSpawned – doesn't contain handle to any entity, nor any living entity is assigned to it.
 #[derive(Default, Debug)]
 pub struct Sector {
     /// The concrete entity to which this logical object is bound to.
+    ///
+    /// Stores the state of `Sector` by (optionally) storing a handle to living entity.
     entity: Option<Entity>,
     /// The translation of the concrete entity.
     translation_x: f32,
@@ -28,6 +34,7 @@ pub struct Sector {
     /// Obstacle restricting passage through the lower part of this sector.
     lower_pole: obstacles::Pole,
 }
+
 impl Sector {
     // Constants – Given
 

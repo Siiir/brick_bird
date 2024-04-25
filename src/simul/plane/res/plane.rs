@@ -1,5 +1,7 @@
 //! Module encapsulating `SimulPlane` struct logic.
 
+pub mod err;
+
 use std::{collections::VecDeque, iter, sync::atomic};
 
 use crate::simul::{plane::sector, Sector};
@@ -11,10 +13,18 @@ use derive_more::IntoIterator;
 /// It is **filled with obstacles** for hero to encounter.
 /// It is also a **container for "plane sectors"**.
 /// Facilitates the **location detection** through _sector detection system_.
+///
+/// # States
+/// * Spawned
+/// * NotSpawned
 #[derive(Resource, Debug, IntoIterator)]
 pub struct SimulPlane {
     /// # Invariants:
-    /// * Should have length = [`Self::SECT_COUNT`] .
+    /// ### const_len invariant
+    /// Should have length = [`Self::SECT_COUNT`] .
+    /// ### spawn_state invariant
+    /// If `self` is in `Spawned` state, all contained `Sector`s should be spawned.
+    /// Otherwise (`NotSpawned` state) all contained `Sector`s should not be spawned.
     #[into_iterator(ref_mut, ref)]
     x_axis: std::collections::VecDeque<Sector>,
 }
@@ -25,6 +35,10 @@ impl SimulPlane {
     pub const HERO_SECT_IDX: usize = 3;
     const COUNT_OF_INITIALLY_EMPTY_SECTS_BEFORE_HERO: usize = 1;
     /// The default count of sectors in the plane.
+    ///
+    /// # Invariants
+    /// ### space_for_hero invariant
+    /// Must be > 1.
     pub const SECT_COUNT: usize = 9;
     /// The x cordinate on which the first sector will be rendered.
     pub const DEFAULT_FIRST_SECT_X: f32 = 0.0;
@@ -45,6 +59,7 @@ impl SimulPlane {
 
     // Assertions
 
+    /// Makes sure that [`Self::SECT_COUNT`]'s `space_for_hero` invariant holds.
     const _CONTAINS_AT_LEAST_1_SECTOR: () = assert!(
         0 < Self::SECT_COUNT,
         "{}",
@@ -95,34 +110,75 @@ impl SimulPlane {
 
     // CRUD-U: Initializers
 
-    /// **Spawns the entities** representing already initialized sector objects.
+    /// Spawns `this` on bevy's scene.
     ///
-    /// Makes the sector objects refer to the spawned in-simulation entities. Effectively making these objects useful.
+    /// Since `Self` is a set of entities, all of them are spawned.
     ///
-    /// # Expectations
-    /// This is expected to be called at the start of the simulation to create entities corresponding to the logical plane sectors.
-    pub fn spawn_sects(
+    /// # State transition
+    /// `Despawned` -=> `Spawned`
+    ///
+    /// # Panics
+    /// If current state is `Spawned`
+    pub fn spawn(
         mut plane: ResMut<SimulPlane>,
         hero_color: Res<crate::simul::HeroColor>,
         mut cmds: Commands,
     ) {
-        for sector in &mut plane.x_axis {
-            sector
-                .spawn_with_rand_color(hero_color.rbg(), &mut cmds)
-                .unwrap()
+        if let Err(ds @ err::DoubleSpawning) = plane.spawn_sects(&*hero_color, &mut cmds) {
+            panic!("{ds}")
         }
+    }
+
+    /// **Spawns the entities** representing already initialized sector objects.
+    ///
+    /// Makes the sector objects refer to the spawned in-simulation entities. Effectively making these objects useful.
+    fn spawn_sects(
+        &mut self,
+        hero_color: &crate::simul::HeroColor,
+        cmds: &mut Commands,
+    ) -> Result<(), err::DoubleSpawning> {
+        for sector in &mut self.x_axis {
+            if let Err(crate::simul::plane::sector::err::EntityAlreadySpawned { .. }) =
+                sector.spawn_with_rand_color(hero_color.rbg(), cmds)
+            {
+                return Err(err::DoubleSpawning);
+            }
+        }
+        Ok(())
     }
 
     // CRUD-U: Updaters
 
+    /// Despawns `this` from bevy's scene.
+    ///
+    /// Since `Self` is a set of entities, all of them are despawned.
+    ///
+    /// # State transition
+    /// `Spawned` -=> `Despawned`
+    ///
+    /// # Panics
+    /// If current state is `Despawned`.
+    pub fn despawn(mut this: ResMut<Self>, mut cmds: Commands) {
+        if let Err(e) = this.despawn_sects(&mut cmds) {
+            panic!("{e}")
+        }
+    }
+
     /// Despawns the sector entities that the sector objects inside this plane refer to.
     ///
     /// This makes the contained sector objects refering to nothing. Effectivelly putting them to sleep.
-    pub fn despawn_sects(mut this: ResMut<Self>, mut cmds: Commands) {
-        for sector in &mut this {
-            sector.despawn(&mut cmds).unwrap();
+    fn despawn_sects(&mut self, cmds: &mut Commands) -> Result<(), err::NotSpawned> {
+        for sector in self {
+            if let Err(crate::simul::plane::sector::err::EntityNotSpawned { .. }) =
+                sector.despawn(cmds)
+            {
+                return Err(err::NotSpawned);
+            };
         }
+
+        Ok(())
     }
+
     /// Advances the logical plane. Generates new sectors. Drops the old ones.
     ///
     /// This method relyies on the simulation plane's sectors being already spawned.
@@ -140,7 +196,12 @@ impl SimulPlane {
         ).expect("This new sector should not have a corresponding entity yet, because it has just been generated.");
         self.x_axis.push_back(new_sect);
         // Remove displayed front
-        self.x_axis.pop_front().expect("Expected `self.x_axis` to be non-empty, because a value has been just added to it.").despawn(cmds).unwrap();
+        if let Err(crate::simul::plane::sector::err::EntityNotSpawned{..}) = self.x_axis
+            .pop_front()
+            .expect("Expected `self.x_axis` to be non-empty, because a value has been just added to it.")
+            .despawn(cmds){
+            panic!("{}", err::NotSpawned)
+        }
     }
 }
 

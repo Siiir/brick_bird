@@ -4,6 +4,9 @@ authors = ["Tomasz Nehring"]
 version = "1.2.0"
 edition = "2021"
 
+[features]
+dlink = ["bevy/dynamic_linking"]
+
 [lib]
 name = "fly_b"
 

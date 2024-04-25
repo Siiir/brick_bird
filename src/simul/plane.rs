@@ -3,6 +3,9 @@
 pub mod res;
 pub mod sector;
 pub mod sys;
+pub mod err {
+    pub use super::res::plane::err::{NotSpawned, SectorXMissing};
+}
 
 use bevy::prelude::*;
 
@@ -18,7 +21,7 @@ impl Plugin for SimulPlanePlugin {
         // CRUD-C: Startup
         app.add_systems(
             OnEnter(crate::SimulState::Startup),
-            (sys::reset_logical_plane, crate::SimulPlane::spawn_sects).chain(),
+            (sys::reset_logical_plane, crate::SimulPlane::spawn).chain(),
         );
         // CRUD-U: Update
         app.add_systems(
@@ -28,7 +31,7 @@ impl Plugin for SimulPlanePlugin {
         // CRUD-D: Cleanup
         app.add_systems(
             OnEnter(crate::SimulState::Cleanup),
-            crate::SimulPlane::despawn_sects,
+            crate::SimulPlane::despawn,
         );
         // CRUD-D: App exit
         app.add_systems(Update, (sys::run_special_drop_of_sects,));
