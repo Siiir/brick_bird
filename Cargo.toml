@@ -26,3 +26,39 @@ tap = "1.0.1"
 thiserror = "1.0.57"
 # Enriching logic
 num_enum = "0.7.2"
+
+# Optimizing game crate
+[profile.dev.package.game]
+opt-level = 1
+# Optimizing bevy libraries
+[profile.dev.package.bevy]
+opt-level = 3
+
+[profile.fd_release]
+inherits = "release"
+opt-level = 3
+debug = false
+strip = "none"
+lto = true
+codegen-units = 1
+incremental = false
+panic = "abort"
+
+[profile.fw_release]
+inherits = "release"
+opt-level = "s"
+debug = false
+strip = true
+lto = true
+codegen-units = 1
+incremental = false
+panic = "abort"
+
+[profile.fast_d_comp]
+inherits = "dev"
+opt-level = 0
+debug = 0
+strip = "none"
+lto = false
+codegen-units = 256
+incremental = true
