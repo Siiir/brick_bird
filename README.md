@@ -5,8 +5,8 @@
 ### Playing tutorial
 You fly automatically.  
 To avoid obstackles jump.  
-Tip: Do it interchangably using all buttons.  
-##### Jump with
+**Tip**: Do it interchangably using all buttons.  
+#### Jump with
 1. Keyboard – click <space> button.  
 2. Mouse – click <left button>.  
 3. Touch screen – touch anywhere on the game viewport.  
@@ -14,20 +14,20 @@ Tip: Do it interchangably using all buttons.
 # Build & run the app
 
 ### Desktop version
-##### Fast start
+#### Fast start
 1. Go to the folder where you want to install (put) the game.  
 2. Use the following bash commands:  
-```bash
-    git clone github.com/siiir/brick_bird
-    cd brick_bird
-    git switch stable
-    cargo build --release
-```
+  ```bash
+      git clone github.com/siiir/brick_bird
+      cd brick_bird
+      git switch stable
+      cargo build --release
+  ```
   These obviously requires having these bash commands installed.  
 3. When you want to run the game:  
   a) go to instalation folder  
   b) enter command `cargo run -r`  
-##### Better installation
+#### Better installation
 1. Ask AI model. Show it this README.md file.  
 2. See build profiles in "Cargo.toml".  
 
