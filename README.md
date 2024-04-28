@@ -11,7 +11,7 @@ Increases with each passed sector as simulation accelerates.
 ### Tutorial
 You fly automatically.  
 To avoid obstackles jump.  
-**Tip**: Do it interchangably using all buttons.  
+**Tip**: Do it interchangably using all functional buttons.  
 #### Jump with
 1. Keyboard – click \<space\> button.  
 2. Mouse – click \<left button\>.  
@@ -32,8 +32,8 @@ To avoid obstackles jump.
   ```
   These obviously requires having these bash commands installed.  
 3. When you want to run the game:  
-  a) go to instalation folder  
-  b) enter command `cargo run -r`  
+    a) go to instalation folder  
+    b) enter command `cargo run -r`  
 #### Better installation (optimization, click-to-run)
 1. Ask AI model for help. Show it this README.md file & "Cargo.toml" file.  
 2. See build profiles in "Cargo.toml".  
@@ -48,14 +48,14 @@ To avoid obstackles jump.
   ```
   These obviously requires having these bash commands installed.  
 3. When you want to run:  
-  a) go to instalation folder  
-  b) run static file server (eg. Node's http-server or Python3's http.server)  
-  b) open game folder (or index.html file) in the browser  
+    a) go to instalation folder  
+    b) run static file server (eg. Node's http-server or Python3's http.server)  
+    c) open game folder (or index.html file) in the browser  
 
 
-# How this educational **project stands out**?
+# How this educational project stands out?
 ### Own physic engine.
-{collisions, gravity, acceleration, turbulence} have been coded using **math**.  
+{collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
 ### Just code
 Was created without any graphical editor.  
 ### Unique & Pro
