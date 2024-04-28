@@ -24,13 +24,13 @@ To avoid obstackles jump.
 #### Fast start
 1. Go to the folder where you want to install (put) the game.  
 2. Use the following bash commands:  
-  ```bash
-      git clone github.com/siiir/brick_bird
-      cd brick_bird
-      git switch stable
-      cargo build --release
-  ```
-  These obviously requires having these bash commands installed.  
+    ```bash
+    git clone github.com/siiir/brick_bird
+    cd brick_bird
+    git switch stable
+    cargo build --release
+    ```
+    These obviously requires having these bash commands installed.  
 3. When you want to run the game:  
     1. go to instalation folder  
     2. enter command `cargo run -r`  
@@ -41,12 +41,12 @@ To avoid obstackles jump.
 ### Browser version
 1. Go to the folder where you want to install (put) the game.  
 2. Use the following bash commands:  
-  ```bash
-      git clone github.com/siiir/brick_bird
-      cd brick_bird
-      git switch web-stable
-  ```
-  These obviously requires having these bash commands installed.  
+    ```bash
+    git clone github.com/siiir/brick_bird
+    cd brick_bird
+    git switch web-stable
+    ```
+    These obviously requires having these bash commands installed.  
 3. When you want to run:  
     1. go to instalation folder  
     2. run static file server (eg. Node's http-server or Python3's http.server)  
