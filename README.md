@@ -1,10 +1,14 @@
-# How to play?
+# brick_bird – a colorful Flappy Bird clone written in Rust
 
-### Where to play?
-[Online](https://siiir.github.io/brick_bird/) **Note: Chrome browser higly recommended** for playing, due to perfomance.  
-[Download for desktop](https://github.com/Siiir/brick_bird/releases/) **Note:** The game executable must be **put next to the asset folder** before running.
+
+
+## How to play?
+
+### Where to Play?
+- **Online**: Play directly in your browser [here](https://siiir.github.io/brick_bird/). **Note:** Chrome is highly recommended due to better performance.
+- **Desktop**: [Download the desktop version](https://github.com/Siiir/brick_bird/releases/). **Note:** Ensure the game executable is next to the asset folder before running.
 ### Objective
-Score as high **PS** (Passed Sectors count variable) as possible.
+- Aim to achieve the highest **PS** (Passed Sectors count) possible.
 ### Game difficulty
 Marked by **MS** (Movement Speed) variable.
 Increases with each passed sector as simulation accelerates.
@@ -13,15 +17,15 @@ You fly automatically.
 To avoid obstackles jump.  
 **Tip**: Do it interchangably using all functional buttons.  
 #### Jump with
-1. Keyboard – click \<space\> button.  
-2. Mouse – click \<left button\>.  
+1. Keyboard – click `<space>` button.  
+2. Mouse – click `<left button>`.  
 3. Touch screen – touch anywhere on the game viewport.  
 
 
-# Build & run the app
+## Build & run the app
 
 ### Desktop version
-#### Fast start
+#### Quick start
 1. Go to the folder where you want to install (put) the game.  
 2. Use the following bash commands:  
     ```bash
@@ -31,11 +35,11 @@ To avoid obstackles jump.
     cargo build --release
     ```
     These obviously requires having these bash commands installed.  
-3. When you want to run the game:  
+3. When you want to **run the game**:  
     1. go to instalation folder  
     2. enter command `cargo run -r`  
-#### Better installation (optimization, click-to-run)
-1. Ask AI model for help. Show it this README.md file & "Cargo.toml" file.  
+#### Better installation (optimizations, click-to-run)
+1. Ask AI model for help. Show it this README.md file & "Cargo.toml" file. It should help you to compile this project with best optimizations. These improvements are neither obvious nor necessary for everyone.  
 2. See build profiles in "Cargo.toml".  
 
 ### Browser version
@@ -47,17 +51,21 @@ To avoid obstackles jump.
     git switch web-stable
     ```
     These obviously requires having these bash commands installed.  
-3. When you want to run:  
-    1. go to instalation folder  
-    2. run static file server (eg. Node's http-server or Python3's http.server)  
-    3. open game folder (or index.html file) in the browser  
+3. When you want to **run the game**:  
+    1. Serve the game using a static file server:
+        ```bash
+        # Using Node.js http-server
+        http-server . -p 8000
+        # Or using Python3
+        python -m http.server 8000
+        ```
+    2. Access the game in a browser at `http://localhost:8000`.
 
-
-# How this educational project stands out?
+## How this educational project stands out?
 ### Own physic engine.
 {collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
-### Just code
-Was created without any graphical editor.  
-### Unique & Pro
-1. Very modular and scalable.  
-2. Uses unique features of Rust programing languages.  
+### Pure Coding
+- Developed entirely through coding without the use of any graphical editors.
+### Professional and Unique
+- Highly modular and scalable architecture.
+- Leverages unique capabilities of the Rust programming language.
