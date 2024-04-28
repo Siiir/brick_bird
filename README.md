@@ -32,8 +32,8 @@ To avoid obstackles jump.
   ```
   These obviously requires having these bash commands installed.  
 3. When you want to run the game:  
-    a) go to instalation folder  
-    b) enter command `cargo run -r`  
+    1. go to instalation folder  
+    2. enter command `cargo run -r`  
 #### Better installation (optimization, click-to-run)
 1. Ask AI model for help. Show it this README.md file & "Cargo.toml" file.  
 2. See build profiles in "Cargo.toml".  
@@ -48,9 +48,9 @@ To avoid obstackles jump.
   ```
   These obviously requires having these bash commands installed.  
 3. When you want to run:  
-    a) go to instalation folder  
-    b) run static file server (eg. Node's http-server or Python3's http.server)  
-    c) open game folder (or index.html file) in the browser  
+    1. go to instalation folder  
+    2. run static file server (eg. Node's http-server or Python3's http.server)  
+    3. open game folder (or index.html file) in the browser  
 
 
 # How this educational project stands out?
