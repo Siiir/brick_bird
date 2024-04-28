@@ -1,4 +1,4 @@
-import init from './game/brick_bird.js';
+import init from './brick_bird.js';
 
 const canvas = document.getElementById('bird_canvas');
 const playButton = document.getElementById('play_button');
