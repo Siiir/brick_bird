@@ -2,7 +2,11 @@
 ### Where to play?
 [Online](https://siiir.github.io/brick_bird/) **Note: Chrome browser higly recommended** for playing, due to perfomance.  
 // [Desktop]()
-### Playing tutorial
+### Objective
+Score as high **PS** (Passed Sectors count) as possible.
+### Game difficulty
+Increases with each passed sector as simulation accelerates.
+### Tutorial
 You fly automatically.  
 To avoid obstackles jump.  
 **Tip**: Do it interchangably using all buttons.  
