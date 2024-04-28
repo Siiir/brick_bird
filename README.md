@@ -7,8 +7,8 @@ You fly automatically.
 To avoid obstackles jump.  
 **Tip**: Do it interchangably using all buttons.  
 #### Jump with
-1. Keyboard – click <space> button.  
-2. Mouse – click <left button>.  
+1. Keyboard – click \<space\> button.  
+2. Mouse – click \<left button\>.  
 3. Touch screen – touch anywhere on the game viewport.  
 
 # Build & run the app
