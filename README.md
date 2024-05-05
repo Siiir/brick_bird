@@ -14,7 +14,7 @@
 
 ### Where to Play?
 - **Online**: Play directly in your browser [here](https://siiir.github.io/brick_bird/). **Note:** Chrome is highly recommended due to better performance.
-- **Desktop**: [Download the desktop version](https://github.com/Siiir/brick_bird/releases/). **Note:** Ensure the game executable is next to the asset folder before running.
+- **Desktop**: [Download the desktop version](https://github.com/Siiir/brick_bird/releases/). **Note:** Ensure the game executable is next to the "assets" folder before running.
 
 ### Objective
 - Aim to achieve the highest **PS** (Passed Sectors count) possible.
