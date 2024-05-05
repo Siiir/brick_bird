@@ -1,17 +1,28 @@
 # brick_bird – a colorful Flappy Bird clone written in Rust
 
 
+## Evade obstackles ...
+<img alt="game screenshot showing evasion" src="./images/screenshots/PC-FullScreen.png" style="width: 100vw; height: auto;" />
+
+
+## ... in different environments
+
+<img alt="image showing app being run in different environments" src="./images/Many_Envs&Sizes.png" style="width: 100vw; height: auto;" />
+
 
 ## How to play?
 
 ### Where to Play?
 - **Online**: Play directly in your browser [here](https://siiir.github.io/brick_bird/). **Note:** Chrome is highly recommended due to better performance.
-- **Desktop**: [Download the desktop version](https://github.com/Siiir/brick_bird/releases/). **Note:** Ensure the game executable is next to the asset folder before running.
+- **Desktop**: [Download the desktop version](https://github.com/Siiir/brick_bird/releases/). **Note:** Ensure the game executable is next to the "assets" folder before running.
+
 ### Objective
 - Aim to achieve the highest **PS** (Passed Sectors count) possible.
+
 ### Game difficulty
 Marked by **MS** (Movement Speed) variable.
 Increases with each passed sector as simulation accelerates.
+
 ### Tutorial
 You fly automatically.  
 To avoid obstackles jump.  
@@ -52,11 +63,13 @@ To avoid obstackles jump.
     ```
     These obviously requires having these bash commands installed.  
 3. When you want to **run the game**:  
-    1. Serve the game using a static file server:
+    1. Serve the game using a static file server  
+        **Using** Node.js http-server
         ```bash
-        # Using Node.js http-server
         http-server . -p 8000
-        # Or using Python3
+        ```
+        **Or** using Python3
+        ```bash
         python -m http.server 8000
         ```
     2. Access the game in a browser at `http://localhost:8000`.
@@ -64,8 +77,11 @@ To avoid obstackles jump.
 ## How this educational project stands out?
 ### Own physic engine.
 {collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
-### Pure Coding
-- Developed entirely through coding without the use of any graphical editors.
+### Parallel execution
+Will utilize or your cores, when running outside of browser. 
+ECS design allows this game to scale with number of CPUs.
 ### Professional and Unique
 - Highly modular and scalable architecture.
 - Leverages unique capabilities of the Rust programming language.
+### Pure Coding
+- Developed entirely through coding without the use of any graphical editors.
