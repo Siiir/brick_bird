@@ -2,12 +2,12 @@
 
 
 ## Evade obstackles ...
-<img alt="game screenshot showing evasion" src="./images/screenshots/PC-FullScreen.png" style="width: 50%; height: auto;" />
+<img alt="game screenshot showing evasion" src="./images/screenshots/PC-FullScreen.png" style="width: 100vw; height: auto;" />
 
 
 ## ... in different environments
 
-<img alt="image showing app being run in different environments" src="./images/Many_Envs&Sizes.png" style="width: 50%; height: auto;" />
+<img alt="image showing app being run in different environments" src="./images/Many_Envs&Sizes.png" style="width: 100vw; height: auto;" />
 
 
 ## How to play?
@@ -78,7 +78,7 @@ To avoid obstackles jump.
 ### Own physic engine.
 {collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
 ### Parallel execution
-Will utilize or your cores, when running outside of browser.  
+Will utilize or your cores, when running outside of browser. 
 ECS design allows this game to scale with number of CPUs.
 ### Professional and Unique
 - Highly modular and scalable architecture.
