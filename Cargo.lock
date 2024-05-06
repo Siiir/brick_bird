@@ -1093,6 +1093,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "brick_bird"
+version = "1.2.0"
+dependencies = [
+ "bevy",
+ "derive_more",
+ "num_enum 0.7.2",
+ "rand",
+ "tap",
+ "thiserror",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1659,18 +1671,6 @@ dependencies = [
  "futures-io",
  "parking",
  "pin-project-lite",
-]
-
-[[package]]
-name = "game"
-version = "1.2.0"
-dependencies = [
- "bevy",
- "derive_more",
- "num_enum 0.7.2",
- "rand",
- "tap",
- "thiserror",
 ]
 
 [[package]]

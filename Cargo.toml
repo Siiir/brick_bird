@@ -1,6 +1,6 @@
 [package]
 # About
-name = "game"
+name = "brick_bird"
 description = "A colorful Flappy Bird clone written in Rust. Cross platform. Has own physic engine. Parallel."
 authors = ["Tomasz Nehring"]
 # Versions
