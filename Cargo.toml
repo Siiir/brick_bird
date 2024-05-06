@@ -2,12 +2,13 @@
 # About
 name = "brick_bird"
 description = "A colorful Flappy Bird clone written in Rust. Cross platform. Has own physic engine. Parallel."
+# Ownership
 authors = ["Tomasz Nehring"]
 license-file = "./LICENSE.txt"
 # Versions
 version = "1.2.0"
 edition = "2021"
-# Pages
+# Websites
 homepage = "https://github.com/Siiir/brick_bird/"
 documentation = "https://docs.rs/brick_bird/1.2.0/fly_b/"
 repository = "https://github.com/Siiir/brick_bird/"

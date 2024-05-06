@@ -74,6 +74,12 @@ To avoid obstackles jump.
         ```
     2. Access the game in a browser at `http://localhost:8000`.
 
+
+## Documentation
+[Documentation](https://docs.rs/brick_bird/1.2.0/fly_b/)
+for all Rust's "items" used/defined in this project outside of "main.rs".
+
+
 ## How this educational project stands out?
 ### Own physic engine.
 {collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
