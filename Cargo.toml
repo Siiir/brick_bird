@@ -34,6 +34,10 @@ opt-level = 1
 [profile.dev.package.bevy]
 opt-level = 3
 
+[profile.profiling]
+inherits = "release"
+debug = true
+
 [profile.fd_release]
 inherits = "release"
 opt-level = 3
