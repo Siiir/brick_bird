@@ -78,7 +78,7 @@ To avoid obstackles jump.
 ### Own physic engine.
 {collisions, gravity, acceleration, turbulence} have been coded from scrath using **math**.  
 ### Parallel execution
-Will utilize or your cores, when running outside of browser. 
+Will utilize all your cores, when running outside of browser. 
 ECS design allows this game to scale with number of CPUs.
 ### Professional and Unique
 - Highly modular and scalable architecture.
