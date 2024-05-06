@@ -3,13 +3,14 @@
 name = "brick_bird"
 description = "A colorful Flappy Bird clone written in Rust. Cross platform. Has own physic engine. Parallel."
 authors = ["Tomasz Nehring"]
+license-file = "./LICENSE.txt"
 # Versions
 version = "1.2.0"
 edition = "2021"
 # Pages
 homepage = "https://github.com/Siiir/brick_bird/"
+documentation = "https://docs.rs/brick_bird/1.2.0/fly_b/"
 repository = "https://github.com/Siiir/brick_bird/"
-license-file = "./LICENSE.txt"
 
 [features]
 dlink = ["bevy/dynamic_linking"]
@@ -40,10 +41,6 @@ opt-level = 1
 # Optimizing bevy libraries
 [profile.dev.package.bevy]
 opt-level = 3
-
-[profile.profiling]
-inherits = "release"
-debug = true
 
 [profile.fd_release]
 inherits = "release"
