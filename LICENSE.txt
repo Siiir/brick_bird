@@ -1,0 +1,6 @@
+`brick_bird` All Rights Reserved License
+
+This project is the intellectual property of Tomasz Nehring and may not be reproduced, distributed, or modified without explicit permission from the author. Code inspection and reading are permitted for educational and review purposes only. Any other use, including but not limited to copying, modifying, or distributing, is strictly prohibited.
+
+For inquiries regarding licensing or usage rights, please contact tomasz_nehring@outlook.com .
+
