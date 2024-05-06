@@ -35,7 +35,7 @@ thiserror = "1.0.57"
 num_enum = "0.7.2"
 
 # Optimizing game crate
-[profile.dev.package.game]
+[profile.dev.package.brick_bird]
 opt-level = 1
 # Optimizing bevy libraries
 [profile.dev.package.bevy]
