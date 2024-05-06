@@ -1,8 +1,15 @@
 [package]
+# About
 name = "game"
+description = "A colorful Flappy Bird clone written in Rust. Cross platform. Has own physic engine. Parallel."
 authors = ["Tomasz Nehring"]
+# Versions
 version = "1.2.0"
 edition = "2021"
+# Pages
+homepage = "https://github.com/Siiir/brick_bird/"
+repository = "https://github.com/Siiir/brick_bird/"
+license-file = "./LICENSE.txt"
 
 [features]
 dlink = ["bevy/dynamic_linking"]
